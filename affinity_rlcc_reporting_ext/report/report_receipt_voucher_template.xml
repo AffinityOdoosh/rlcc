@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data>
+        <template id="report_receipt_voucher_main_template">
+            <t t-set="primary_color" t-value="'#5E1756'"/>
+            <div class="page" style="font-size: 14px;">
+                <div t-attf-style="border-bottom:3px solid {{primary_color}}; padding-bottom:10px; margin-bottom:30px;">
+                    <h2 class="text-center fw-bold text-uppercase mb-0"
+                        t-attf-style="color:{{primary_color}}; letter-spacing:2px;">
+                        Receipt Voucher
+                    </h2>
+                </div>
+                <div style="background:#F5F7FA;border:1px solid #D9E2EC;border-radius:8px;padding:18px 22px;margin-bottom:30px;">
+                    <div class="row align-items-center">
+                        <div class="col-4">
+                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Voucher No.
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
+                                <span t-field="o.name"/>
+                            </div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Received From
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
+                                <span t-field="o.partner_id.name"/>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Voucher Date
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
+                                <span t-field="o.date"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="table mb-5"
+                       style="font-size:14px; border:1px solid #d7dee8; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:8px;">
+                    <thead t-attf-style="background:{{primary_color}};">
+                        <tr>
+                            <th class="text-start py-3 ps-3 text-uppercase"
+                                style="border:none;font-weight:600;letter-spacing:.5px;color:#FFFFFF;">
+                                Account
+                            </th>
+                            <th class="text-center py-3 text-uppercase"
+                                style="border:none;font-weight:600;letter-spacing:.5px;color:#FFFFFF;">
+                                Description
+                            </th>
+                            <th class="text-end py-3 text-uppercase"
+                                style="border:none;font-weight:600;letter-spacing:.5px;color:#FFFFFF;">
+                                Debit
+                            </th>
+                            <th class="text-end py-3 pe-3 text-uppercase"
+                                style="border:none;font-weight:600;letter-spacing:.5px;color:#FFFFFF;">
+                                Credit
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-set="total_debit" t-value="0.0"/>
+                        <t t-set="total_credit" t-value="0.0"/>
+                        <tr t-foreach="o.move_id.line_ids"
+                            t-as="line"
+                            style="border-bottom:1px solid #e6ebf2; background:#ffffff;">
+                            <td class="py-3 ps-3">
+                                <div class="fw-bold" t-attf-style="color:{{primary_color}};"
+                                     t-field="line.account_id.name"/>
+                            </td>
+                            <td class="py-3 text-center" style="color:#495057;">
+                                <span t-field="line.name"/>
+                            </td>
+                            <td class="py-3 text-end" style="color:#1f2937;">
+                                <span t-field="line.debit"
+                                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+                                <t t-set="total_debit" t-value="total_debit + line.debit"/>
+                            </td>
+                            <td class="py-3 pe-3 text-end" style="color:#1f2937;">
+                                <span t-field="line.credit"
+                                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+                                <t t-set="total_credit" t-value="total_credit + line.credit"/>
+                            </td>
+                        </tr>
+                        <tr style="background:#eef3f8;">
+                            <td colspan="2" class="text-end py-3"
+                                t-attf-style="font-weight:700; color:{{primary_color}};">TOTAL
+                            </td>
+                            <td class="text-end py-3" t-attf-style="font-weight:700; color:{{primary_color}};">
+                                <span t-esc="total_debit"
+                                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+                            </td>
+                            <td class="text-end py-3 pe-3" t-attf-style="font-weight:700; color:{{primary_color}};">
+                                <span t-esc="total_credit"
+                                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div t-attf-style="background:#EEF3F8; border-left:5px solid {{primary_color}}; border-radius:8px; padding:18px; margin-bottom:18px;">
+                    <div style="font-size:11px; color:#6B7280; text-transform:uppercase; font-weight:600;">Rupees (In
+                        Words)
+                    </div>
+                    <div style="font-size:15px; color:#1F2937; font-weight:600;">
+                        <span class="text-capitalize" t-esc="o.currency_id.amount_to_text(total_debit)"/>
+                    </div>
+                </div>
+                <div t-attf-style="background:#EEF3F8; border-left:5px solid {{primary_color}}; border-radius:8px; padding:18px; margin-bottom:18px;">
+                    <div style="font-size:11px; color:#6B7280; text-transform:uppercase; font-weight:600;">Remarks</div>
+                    <div style="font-size:15px; color:#1F2937; font-weight:600;">
+                        <span t-field="o.memo"/>
+                    </div>
+                </div>
+                <div class="row mt-5 pt-5" style="font-size:14px;">
+                    <div class="col-4 text-center">
+                        <div style="height:40px;padding-top:16px;box-sizing:border-box;">
+                            <span t-if="o.create_uid"
+                                  t-field="o.create_uid.name"
+                                  style="display:inline-block;color:#1F2937;font-size:14px;font-weight:600;line-height:14px;"/>
+                        </div>
+                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
+                            Accountant
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="height:40px;"/>
+                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
+                            Project Manager
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="height:40px;"/>
+                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
+                            Chairperson
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="report_receipt_voucher_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="pager" t-value="False"/>
+                    <t t-call="web.external_layout">
+                        <t t-call="affinity_rlcc_reporting_ext.report_receipt_voucher_main_template"/>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data>
+        <record id="account.action_report_payment_receipt" model="ir.actions.report">
+            <field name="binding_model_id" eval="False"/>
+        </record>
+
+        <record id="action_report_journal_voucher" model="ir.actions.report">
+            <field name="name">Journal Voucher</field>
+            <field name="model">account.move</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="print_report_name">'Journal Voucher - %s' % (object.name)</field>
+            <field name="report_name">affinity_rlcc_reporting_ext.report_journal_voucher_template</field>
+            <field name="report_file">affinity_rlcc_reporting_ext.report_journal_voucher_template</field>
+            <field name="binding_model_id" ref="account.model_account_move"/>
+            <field name="binding_type">report</field>
+            <field name="domain">[('move_type', '=', 'entry')]</field>
+        </record>
+
+        <record id="action_report_payment_voucher" model="ir.actions.report">
+            <field name="name">Payment Voucher</field>
+            <field name="model">account.payment</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="print_report_name">'Payment Voucher - %s' % (object.name)</field>
+            <field name="report_name">affinity_rlcc_reporting_ext.report_payment_voucher_template</field>
+            <field name="report_file">affinity_rlcc_reporting_ext.report_payment_voucher_template</field>
+            <field name="binding_model_id" ref="account.model_account_payment"/>
+            <field name="binding_type">report</field>
+<!--            <field name="domain">[('payment_type', '=', 'outbound')]</field>-->
+        </record>
+
+        <record id="action_report_petty_cash_payment" model="ir.actions.report">
+            <field name="name">Petty Cash Payment</field>
+            <field name="model">account.payment</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="print_report_name">'Petty Cash Payment - %s' % (object.name)</field>
+            <field name="report_name">affinity_rlcc_reporting_ext.report_petty_cash_payment_template</field>
+            <field name="report_file">affinity_rlcc_reporting_ext.report_petty_cash_payment_template</field>
+            <field name="binding_model_id" ref="account.model_account_payment"/>
+            <field name="binding_type">report</field>
+<!--            <field name="domain">[('payment_type', '=', 'outbound')]</field>-->
+        </record>
+
+        <record id="action_report_petty_cash_receipt" model="ir.actions.report">
+            <field name="name">Petty Cash Receipt</field>
+            <field name="model">account.payment</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="print_report_name">'Petty Cash Receipt - %s' % (object.name)</field>
+            <field name="report_name">affinity_rlcc_reporting_ext.report_petty_cash_receipt_template</field>
+            <field name="report_file">affinity_rlcc_reporting_ext.report_petty_cash_receipt_template</field>
+            <field name="binding_model_id" ref="account.model_account_payment"/>
+            <field name="binding_type">report</field>
+<!--            <field name="domain">[('payment_type', '=', 'inbound')]</field>-->
+        </record>
+
+        <record id="action_report_receipt_voucher" model="ir.actions.report">
+            <field name="name">Receipt Voucher</field>
+            <field name="model">account.payment</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="print_report_name">'Receipt Voucher - %s' % (object.name)</field>
+            <field name="report_name">affinity_rlcc_reporting_ext.report_receipt_voucher_template</field>
+            <field name="report_file">affinity_rlcc_reporting_ext.report_receipt_voucher_template</field>
+            <field name="binding_model_id" ref="account.model_account_payment"/>
+            <field name="binding_type">report</field>
+<!--            <field name="domain">[('payment_type', '=', 'inbound')]</field>-->
+        </record>
+    </data>
+</odoo>

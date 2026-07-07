@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data>
+        <template id="external_layout_standard_inherit_pager" inherit_id="web.external_layout_standard">
+            <xpath expr="//div[@class='o_footer_content d-flex border-top pt-2']" position="replace">
+                <div t-attf-class="o_footer_content d-flex {{ (pager if pager is not None else True) and 'border-top pt-2' or '' }}">
+                    <div class="flex-grow-1 text-start me-2" t-field="company.report_footer"/>
+                    <div class="text-end text-muted"
+                         t-if="pager if pager is not None else True">
+                        <div t-if="report_type == 'pdf' and display_name_in_footer" t-out="o.name"/>
+                        <div t-if="report_type == 'pdf'" class="text-nowrap">Page
+                            <span class="page"/>
+                            /
+                            <span class="topage"/>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+    </data>
+</odoo>

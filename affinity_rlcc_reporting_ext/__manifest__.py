@@ -1,0 +1,31 @@
+# -*- coding: utf-8 -*-
+
+{
+    'name': 'Affinity RLCC Reporting Extension',
+    'author': 'Affinity Business Suite',
+    'website': 'https://affinitysuite.net',
+    'support': 'info@affinitysuite.net',
+    'category': 'Reporting',
+    'summary': 'Affinity RLCC Reporting Extension Module',
+    'description': '''Affinity RLCC Reporting Extension Module''',
+    'version': '18.0',
+    'depends': ['affinity_rlcc_ext'],
+    'data': [
+        'report/external_layout_standard_template.xml',
+        'report/report_journal_voucher_template.xml',
+        'report/report_payment_voucher_template.xml',
+        'report/report_petty_cash_payment_template.xml',
+        'report/report_petty_cash_receipt_template.xml',
+        'report/report_receipt_voucher_template.xml',
+        'report/ir_actions_report.xml',
+    ],
+    'assets': {},
+    'images': [],
+    'price': 4000000,
+    'currency': 'EUR',
+    'license': 'OPL-1',
+    'application': False,
+    'auto_install': False,
+    'installable': True,
+}
+
