@@ -27,7 +27,7 @@
             <field name="report_file">affinity_rlcc_reporting_ext.report_payment_voucher_template</field>
             <field name="binding_model_id" ref="account.model_account_payment"/>
             <field name="binding_type">report</field>
-<!--            <field name="domain">[('payment_type', '=', 'outbound')]</field>-->
+            <field name="domain">[('payment_type', '=', 'outbound')]</field>
         </record>
 
         <record id="action_report_petty_cash_payment" model="ir.actions.report">
@@ -39,7 +39,7 @@
             <field name="report_file">affinity_rlcc_reporting_ext.report_petty_cash_payment_template</field>
             <field name="binding_model_id" ref="account.model_account_payment"/>
             <field name="binding_type">report</field>
-<!--            <field name="domain">[('payment_type', '=', 'outbound')]</field>-->
+            <field name="domain">[('payment_type', '=', 'outbound')]</field>
         </record>
 
         <record id="action_report_petty_cash_receipt" model="ir.actions.report">
@@ -51,7 +51,7 @@
             <field name="report_file">affinity_rlcc_reporting_ext.report_petty_cash_receipt_template</field>
             <field name="binding_model_id" ref="account.model_account_payment"/>
             <field name="binding_type">report</field>
-<!--            <field name="domain">[('payment_type', '=', 'inbound')]</field>-->
+            <field name="domain">[('payment_type', '=', 'inbound')]</field>
         </record>
 
         <record id="action_report_receipt_voucher" model="ir.actions.report">
@@ -63,7 +63,7 @@
             <field name="report_file">affinity_rlcc_reporting_ext.report_receipt_voucher_template</field>
             <field name="binding_model_id" ref="account.model_account_payment"/>
             <field name="binding_type">report</field>
-<!--            <field name="domain">[('payment_type', '=', 'inbound')]</field>-->
+            <field name="domain">[('payment_type', '=', 'inbound')]</field>
         </record>
     </data>
 </odoo>
