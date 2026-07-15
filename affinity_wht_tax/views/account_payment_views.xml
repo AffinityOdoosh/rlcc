@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="mjt_view_account_payment_form_inherit" model="ir.ui.view">
+            <field name="name">mjt.account.payment.form.inherit</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet//group[1]" position="after">
+                    <notebook>
+                        <page id="withholding_tab" string="Withholding Lines">
+                            <field name="wht_line_ids" readonly="state != 'draft'" nolabel="1">
+                                <list editable="bottom" string="Withholding Items">
+                                    <field name="account_id"/>
+                                    <field name="description"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="amount" widget="monetary"/>
+                                </list>
+                                <form>
+                                    <sheet>
+                                        <group>
+                                            <field name="account_id"/>
+                                            <field name="description"/>
+                                            <field name="currency_id" invisible="1"/>
+                                            <field name="amount" widget="monetary"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

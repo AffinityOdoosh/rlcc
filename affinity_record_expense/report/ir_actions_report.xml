@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="action_report_expense_voucher" model="ir.actions.report">
+            <field name="name">Expense Voucher</field>
+            <field name="model">record.expense</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">affinity_record_expense.report_expense_voucher_template</field>
+            <field name="report_file">affinity_record_expense.report_expense_voucher_template</field>
+            <field name="binding_model_id" ref="model_record_expense"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="affinity_record_expense.paperformat_a4_custom"/>
+        </record>
+    </data>
+</odoo>

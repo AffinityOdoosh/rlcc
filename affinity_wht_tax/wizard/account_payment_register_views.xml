@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="mjt_view_account_payment_register_form_inherit" model="ir.ui.view">
+            <field name="name">account.payment.register.form.inherit</field>
+            <field name="model">account.payment.register</field>
+            <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group" position="after">
+                    <notebook>
+                        <page id="withholding_tab" string="Withholding Lines">
+                            <field name="wht_tax_line_ids" mode="list,kanban">
+                                <list editable="bottom" string="Witholding Items">
+                                    <field name="tax_id" options="{'no_create': True}"/>
+                                    <field name="description" required="1"/>
+                                    <field name="account_id" options="{'no_create': True}"/>
+                                    <field name="manually_added" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="withholding_amount" force_save="1" readonly="tax_id"
+                                           widget="monetary"/>
+                                </list>=
+                                <form>
+                                    <sheet>
+                                        <group>
+                                            <field name="tax_id" options="{'no_create': True}"/>
+                                            <field name="description" required="1"/>
+                                            <field name="account_id" options="{'no_create': True}"/>
+                                            <field name="manually_added" invisible="1"/>
+                                            <field name="currency_id" invisible="1"/>
+                                            <field name="withholding_amount" force_save="1" readonly="tax_id"
+                                                   widget="monetary"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </xpath>
+                <xpath expr="//field[@name='group_payment']" position="attributes">
+                    <attribute name="widget">boolean_toggle</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="view_move_form_asset_inherit_account" model="ir.ui.view">
+            <field name="name">account.move.form</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+            <field name="arch" type="xml">
+                <field name="type" position="before">
+                    <field name="is_miscellaneous_journal" widget="boolean_toggle"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

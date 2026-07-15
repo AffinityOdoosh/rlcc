@@ -1,0 +1,33 @@
+# -*- coding: utf-8 -*-
+
+{
+    'name': 'Affinity Record Expense',
+    'author': 'Affinity Business Suite',
+    'website': 'https://affinitysuite.net',
+    'support': 'info@affinitysuite.net',
+    'category': 'Expense',
+    'summary': 'Record Expense Module',
+    'description': '''Record Expense Module''',
+    'version': '18.0',
+    'depends': ['account', 'sale'],
+    'data': [
+        'data/ir_module_category.xml',
+        'data/ir_sequence.xml',
+        'data/report_paperformat.xml',
+        'security/res_groups.xml',
+        'security/ir.model.access.csv',
+        'report/report_expense_voucher_template.xml',
+        'report/ir_actions_report.xml',
+        'views/account_journal_views.xml',
+        'views/account_move_views.xml',
+        'views/record_expense_views.xml',
+    ],
+    'assets': {},
+    'images': [],
+    'price': 4000000,
+    'currency': 'EUR',
+    'license': 'OPL-1',
+    'application': True,
+    'auto_install': False,
+    'installable': True,
+}

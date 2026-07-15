@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data>
+        <template id="report_expense_voucher_main_template">
+            <t t-set="primary_color" t-value="'#0B2447'"/>
+            <div class="page" style="font-size: 15px;">
+                <div t-attf-style="border-bottom:2px solid {{primary_color}}; padding-bottom:6px; margin-bottom:15px;">
+                    <h3 class="text-center fw-bold text-uppercase mb-0"
+                        t-attf-style="color:{{primary_color}}; letter-spacing:1px;">
+                        Expense Voucher
+                    </h3>
+                </div>
+                <div style="background:#F5F7FA;border:1px solid #D9E2EC;border-radius:6px;padding:10px 15px;margin-bottom:15px;">
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <div style="font-size:12px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Ledger Name
+                            </div>
+                            <div style="font-size:16px;font-weight:600;color:#1F2937;margin-top:2px;">
+                                <span t-field="o.name"/>
+                            </div>
+                        </div>
+                        <div class="col-6 text-end">
+                            <div style="font-size:12px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Date
+                            </div>
+                            <div style="font-size:16px;font-weight:600;color:#1F2937;margin-top:2px;">
+                                <span t-field="o.date"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="table mb-3"
+                       style="font-size:15px; border:1px solid #d7dee8; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:6px;">
+                    <thead t-attf-style="background:{{primary_color}};">
+                        <tr>
+                            <th class="text-start py-2 ps-2 text-uppercase"
+                                style="border:none;font-weight:600;letter-spacing:.5px;color:#FFFFFF;width:60%;">
+                                Description
+                            </th>
+                            <th class="text-end py-2 text-uppercase"
+                                style="border:none;font-weight:600;letter-spacing:.5px;color:#FFFFFF;width:20%;">
+                                Amount
+                            </th>
+                            <th class="text-center py-2 pe-2 text-uppercase"
+                                style="border:none;font-weight:600;letter-spacing:.5px;color:#FFFFFF;width:20%;">
+                                Signature
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-set="total_amount" t-value="0.0"/>
+                        <tr t-foreach="o.record_expense_line_ids"
+                            t-as="line"
+                            style="border-bottom:1px solid #e6ebf2; background:#ffffff;">
+                            <td class="py-1 ps-2">
+                                <div style="color:#1f2937;font-weight:500;" t-field="line.description"/>
+                            </td>
+                            <td class="py-1 text-end" style="color:#1f2937;">
+                                <span t-field="line.amount"
+                                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+                                <t t-set="total_amount" t-value="total_amount + line.amount"/>
+                            </td>
+                            <td class="py-1 text-center pe-2" style="color:#495057;">
+                            </td>
+                        </tr>
+                        <tr style="background:#eef3f8;">
+                            <td class="text-end py-2"
+                                t-attf-style="font-weight:700; color:{{primary_color}};">TOTAL
+                            </td>
+                            <td class="text-end py-2"
+                                t-attf-style="font-weight:700; color:{{primary_color}};">
+                                <span t-esc="total_amount"
+                                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+                            </td>
+                            <td class="py-2 pe-2"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div t-attf-style="background:#EEF3F8; border-left:4px solid {{primary_color}}; border-radius:6px; padding:10px 15px; margin-bottom:15px;">
+                    <div style="font-size:12px; color:#6B7280; text-transform:uppercase; font-weight:600;">
+                        Rupees (In Words)
+                    </div>
+                    <div style="font-size:16px; color:#1F2937; font-weight:600;">
+                        <span class="text-capitalize" t-esc="o.currency_id.amount_to_text(total_amount)"/>
+                    </div>
+                </div>
+
+                <div class="row mt-4 pt-3" style="font-size:15px;">
+                    <div class="col-4 text-center">
+                        <div style="height:30px;"/>
+                        <div t-attf-style="width:130px;height:1px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:6px;color:{{primary_color}};font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.5px;">
+                            Cashier
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="height:30px;"/>
+                        <div t-attf-style="width:130px;height:1px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:6px;color:{{primary_color}};font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.5px;">
+                            Manager
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="height:30px;"/>
+                        <div t-attf-style="width:130px;height:1px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:6px;color:{{primary_color}};font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.5px;">
+                            Director
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="report_expense_voucher_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.basic_layout">
+                        <t t-call="affinity_record_expense.report_expense_voucher_main_template"/>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

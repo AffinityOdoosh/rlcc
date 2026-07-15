@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="mjt_account_move_inherit" model="ir.ui.view">
+            <field name="name">mjt.account.move.inherit</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='tax_ids']" position="after">
+                    <field name="withholding_tax_ids" options="{'no_create': True, 'no_create_edit':True}"
+                           widget="many2many_tags"/>
+                    <field name="withholding_subtotal"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

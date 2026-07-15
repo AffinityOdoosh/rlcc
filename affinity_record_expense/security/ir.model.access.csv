@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_record_expense_user,access.record.expense.user,model_record_expense,affinity_record_expense.group_record_expense_user,1,0,0,0
+access_record_expense_line_user,access.record.expense.line.user,model_record_expense_line,affinity_record_expense.group_record_expense_user,1,0,0,0
+access_record_expense_manager,access.record.expense.manager,model_record_expense,affinity_record_expense.group_record_expense_manager,1,1,1,1
+access_record_expense_line_manager,access.record.expense.line.manager,model_record_expense_line,affinity_record_expense.group_record_expense_manager,1,1,1,1

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="view_record_expense_tree" model="ir.ui.view">
+            <field name="name">record.expense.list</field>
+            <field name="model">record.expense</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name"/>
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="date"/>
+                    <field name="journal_id"/>
+                    <field name="total_expense" sum="Total"/>
+                    <field name="state" widget="badge"
+                           decoration-info="state == 'draft'"
+                           decoration-success="state == 'posted'"
+                           decoration-danger="state == 'cancel'"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_expense_module_form" model="ir.ui.view">
+            <field name="name">record.expense.form</field>
+            <field name="model">record.expense</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_post" string="Post Expense" type="object" class="btn-primary"
+                                invisible="state != 'draft'"/>
+                        <button name="action_draft" string="Reset to Draft" type="object"
+                                invisible="state == 'draft'"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_open_journal_entry" type="object" class="oe_stat_button" icon="fa-book"
+                                    string="Journal Entry" invisible="not move_id"/>
+                            <xpath expr="//div[@name='button_box']" position="inside">
+                                <button class="oe_stat_button" icon="fa-bars" type="object"
+                                        name="action_open_cancelled_journal_entries"
+                                        invisible="cancelled_move_count == 0">
+                                    <field widget="statinfo" name="cancelled_move_count" string="Cancelled Entries"/>
+                                </button>
+                            </xpath>
+                        </div>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" readonly="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="paid_to"/>
+                                <field name="journal_id" readonly="state != 'draft' or move_id"
+                                       options="{'no_create': True, 'no_create_edit': True}"/>
+                                <field name="account_id" force_save="1" invisible="not journal_id" readonly="1"
+                                       options="{'no_create': True, 'no_create_edit': True}"/>
+                                <field name="memo"/>
+                                <field name="currency_id" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="posting_date" readonly="1"/>
+                                <field name="date" readonly="state != 'draft'"/>
+                                <field name="payment_method" readonly="state != 'draft'"/>
+                                <field name="payment_date" invisible="payment_method == 'cheque'"
+                                       readonly="state != 'draft'"/>
+                                <field name="payment_date" string="Cheque Date" invisible="payment_method != 'cheque'"
+                                       readonly="state != 'draft'"/>
+                                <field name="cheque_number" invisible="payment_method != 'cheque'"
+                                       readonly="state != 'draft'"/>
+                                <field name="company_id" readonly="1" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="total_expense" readonly="1"/>
+                                <field name="amount_in_words" readonly="1"/>
+                            </group>
+                            <group></group>
+                        </group>
+                        <notebook>
+                            <page string="Expense Lines">
+                                <field name="record_expense_line_ids" readonly="state != 'draft'">
+                                    <list editable="bottom">
+                                        <field name="currency_id" column_invisible="1"/>
+                                        <field name="account_id"/>
+                                        <field name="description"/>
+                                        <field name="partner_id"/>
+                                        <field name="analytical_field" widget="analytic_distribution" optional="hide"/>
+                                        <field name="amount" sum="Total"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_expense_module_search" model="ir.ui.view">
+            <field name="name">record.expense.search</field>
+            <field name="model">record.expense</field>
+            <field name="arch" type="xml">
+                <search string="Search Expense">
+                    <field name="name"/>
+                    <field name="paid_to"/>
+                    <field name="journal_id"/>
+                    <field name="memo"/>
+                    <field name="date"/>
+                    <filter string="My Expenses" name="my_expenses" domain="[('create_uid','=',uid)]"/>
+                    <separator/>
+                    <filter string="Draft" name="state_draft" domain="[('state','=','draft')]"/>
+                    <filter string="Posted" name="state_posted" domain="[('state','=','posted')]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Status" name="group_by_state" context="{'group_by':'state'}"/>
+                        <separator/>
+                        <filter string="Journal" name="group_by_journal" context="{'group_by':'journal_id'}"/>
+                        <filter string="Paid To" name="group_by_paid_to" context="{'group_by':'paid_to'}"/>
+                        <separator/>
+                        <filter string="Date" name="group_by_date" context="{'group_by':'date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="record_expense_action" model="ir.actions.act_window">
+            <field name="name">Expense Module</field>
+            <field name="res_model">record.expense</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">Create Your First Expense</p>
+            </field>
+        </record>
+
+        <menuitem id="record_expense_root"
+                  name="Expense"
+                  sequence="10"
+                  web_icon="affinity_record_expense,static/description/icon.png"/>
+
+        <menuitem id="record_expense_accounting"
+                  name="Accounting"
+                  parent="record_expense_root"
+                  sequence="10"/>
+
+        <menuitem id="record_expense_expenses"
+                  name="Expenses"
+                  parent="record_expense_accounting"
+                  action="record_expense_action"
+                  sequence="10"/>
+    </data>
+</odoo>
