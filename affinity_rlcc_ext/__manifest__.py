@@ -9,9 +9,9 @@
     'summary': 'Affinity RLCC Extension Module',
     'description': '''Affinity RLCC Extension Module''',
     'version': '18.0',
-    'depends': ['account', 'purchase', 'sale', 'stock'],
+    'depends': ['account', 'purchase', 'sale', 'stock','hr_contact'],
     'data': [
-
+        'views/res_partner_views.xml',
     ],
     'assets': {},
     'images': [],
