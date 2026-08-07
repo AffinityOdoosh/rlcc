@@ -1,0 +1,22 @@
+name: Deploy RLCC (Self-Hosted)
+
+on:
+  push:
+    branches:
+      - main  # Change to master if that's your primary branch
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Fetch and Hard Reset /opt/odoo18/rlcc
+        run: |
+          git config --global --add safe.directory /opt/odoo18/rlcc
+          cd /opt/odoo18/rlcc
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Restart Odoo 18 Service
+        run: |
+          sudo systemctl restart odoo18
