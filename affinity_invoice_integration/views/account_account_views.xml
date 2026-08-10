@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="view_account_form_asset_inherit_api_code" model="ir.ui.view">
+            <field name="name">account.account.form.asset.inherit.api.code</field>
+            <field name="model">account.account</field>
+            <field name="inherit_id" ref="account_asset.view_account_form_asset_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//td[hasclass('o_td_label')]" position="before">
+                    <field name="api_account_code"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
