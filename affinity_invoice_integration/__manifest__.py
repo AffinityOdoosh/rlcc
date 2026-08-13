@@ -16,6 +16,7 @@
         'data/ir_cron.xml',
         'wizard/voucher_fetch_wizard_views.xml',
         'views/account_account_views.xml',
+        'views/account_move_views.xml',
     ],
     'assets': {},
     'images': [],

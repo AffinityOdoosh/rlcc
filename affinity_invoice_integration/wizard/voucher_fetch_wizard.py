@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import date, timedelta
 import requests
 
-from odoo import api, models, fields
+from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 
 BASE_URL = 'https://rlcc.glowsims.com/api/finance/v1'
@@ -32,7 +32,7 @@ class VoucherFetchWizard(models.TransientModel):
             resp.raise_for_status()
             return resp.json().get('access_token')
         except requests.exceptions.RequestException as e:
-            raise UserError(f'❌ Token generation failed: {e}')
+            raise UserError(_('API Authentication Failed.\n\nUnable to generate access token: %s') % e)
 
     def _fetch_journal_entries(self, token, target_date_from, target_date_to):
         headers = {
@@ -59,7 +59,8 @@ class VoucherFetchWizard(models.TransientModel):
                 resp.raise_for_status()
                 data = resp.json()
             except requests.exceptions.RequestException as e:
-                raise UserError(f'❌ Request failed on page {page}: {e}')
+                raise UserError(
+                    _('API Fetch Exception.\n\nFailed to retrieve journal entries on page %s: %s') % (page, e))
 
             page_data = data.get('data', [])
             entries.extend(page_data)
@@ -73,6 +74,20 @@ class VoucherFetchWizard(models.TransientModel):
         return entries
 
     def _process_and_create_jv(self, target_date_from, target_date_to):
+        existing_move = self.env['account.move'].search([
+            ('voucher_date_from', '=', target_date_from),
+            ('voucher_date_to', '=', target_date_to),
+            ('state', '!=', 'cancel'),
+        ], limit=1)
+
+        if existing_move:
+            raise UserError(
+                _('Duplicate Entry Detected.\n\nA Journal Entry (%s) has already been created for the date range %s to %s.') % (
+                    existing_move.name or _('Draft'),
+                    target_date_from,
+                    target_date_to
+                ))
+
         token = self._get_api_token()
         entries = self._fetch_journal_entries(token, target_date_from, target_date_to)
 
@@ -117,16 +132,15 @@ class VoucherFetchWizard(models.TransientModel):
         if missing_accounts:
             missing_msg = '\n'.join(missing_accounts)
             raise UserError(
-                f'The following accounts from the API were not mapped in Chart of Accounts:\n\n{missing_msg}\n\n'
-                "Please set the 'API Account Code' field on these accounts in Chart of Accounts before fetching."
-            )
+                _('Unmapped Accounts Detected.\n\nThe following external accounts are missing in the Chart of Accounts mapping:\n\n%s\n\nPlease set the "API Account Code" on the respective accounts before proceeding.') % missing_msg)
 
         glowsims_journal = self.env['account.journal'].search([('name', 'ilike', 'glowsims')], limit=1)
         if not glowsims_journal:
             glowsims_journal = self.env['account.journal'].search([('type', '=', 'general')], limit=1)
 
         if not glowsims_journal:
-            raise UserError('No matching journal found in Odoo. Please configure a Journal first.')
+            raise UserError(
+                _('Configuration Error.\n\nNo suitable General Journal was found to register the synchronized entries. Please configure a journal.'))
 
         move_lines = []
         for code in active_codes:
@@ -148,6 +162,8 @@ class VoucherFetchWizard(models.TransientModel):
             'journal_id': glowsims_journal.id,
             'date': target_date_to,
             'ref': f'Accumulated JV Sync ({target_date_from} to {target_date_to})',
+            'voucher_date_from': target_date_from,
+            'voucher_date_to': target_date_to,
             'line_ids': move_lines,
         }
 
@@ -156,10 +172,12 @@ class VoucherFetchWizard(models.TransientModel):
     def action_fetch_and_create_jv(self):
         journal_entry = self._process_and_create_jv(self.date_from, self.date_to)
         if not journal_entry:
-            raise UserError('No journal entries or non-zero balances found for the selected date range.')
+            raise UserError(
+                _('No Data Found.\n\nNo active transactions or non-zero balances were retrieved for the selected date range (%s to %s).') % (
+                    self.date_from, self.date_to))
 
         return {
-            'name': 'Journal Entry',
+            'name': _('Journal Entry'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move',
             'res_id': journal_entry.id,
@@ -170,5 +188,8 @@ class VoucherFetchWizard(models.TransientModel):
     @api.model
     def cron_fetch_previous_day_vouchers(self):
         yesterday = date.today() - timedelta(days=1)
-        wizard = self.create({'date_from': yesterday, 'date_to': yesterday})
+        wizard = self.create({
+            'date_from': yesterday,
+            'date_to': yesterday,
+        })
         wizard._process_and_create_jv(yesterday, yesterday)
