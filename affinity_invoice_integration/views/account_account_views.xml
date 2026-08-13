@@ -2,13 +2,21 @@
 
 <odoo>
     <data>
-        <record id="view_account_form_asset_inherit_api_code" model="ir.ui.view">
-            <field name="name">account.account.form.asset.inherit.api.code</field>
+        <record id="view_account_form_inherit_api_tab" model="ir.ui.view">
+            <field name="name">account.account.form.inherit.api.tab</field>
             <field name="model">account.account</field>
-            <field name="inherit_id" ref="account_asset.view_account_form_asset_inherit"/>
+            <field name="inherit_id" ref="account.view_account_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//td[hasclass('o_td_label')]" position="before">
-                    <field name="api_account_code"/>
+                <xpath expr="//notebook" position="inside">
+                    <page name="api_integration" string="API Integration">
+                        <group>
+                            <group string="API Details">
+                                <field name="api_account_code" placeholder="e.g. API-1001"/>
+                                <field name="api_account_name" invisible="not api_account_name" readonly="1"
+                                       force_save="1"/>
+                            </group>
+                        </group>
+                    </page>
                 </xpath>
             </field>
         </record>
