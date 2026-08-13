@@ -9,7 +9,7 @@
     'summary': 'Affinity RLCC Extension Module',
     'description': '''Affinity RLCC Extension Module''',
     'version': '18.0',
-    'depends': ['base','account', 'purchase', 'sale', 'stock'],
+    'depends': ['account', 'purchase', 'sale', 'stock'],
     'data': [
         'views/res_partner_views.xml',
     ],
@@ -22,4 +22,3 @@
     'auto_install': False,
     'installable': True,
 }
-
