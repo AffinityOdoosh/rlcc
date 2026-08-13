@@ -1,6 +1,7 @@
 import calendar
 from collections import defaultdict
 from datetime import date, timedelta
+
 import requests
 
 from odoo import api, models, fields, _
@@ -75,18 +76,21 @@ class VoucherFetchWizard(models.TransientModel):
 
     def _process_and_create_jv(self, target_date_from, target_date_to):
         existing_move = self.env['account.move'].search([
-            ('voucher_date_from', '=', target_date_from),
-            ('voucher_date_to', '=', target_date_to),
             ('state', '!=', 'cancel'),
+            ('voucher_date_from', '<=', target_date_to),
+            ('voucher_date_to', '>=', target_date_from),
         ], limit=1)
 
         if existing_move:
-            raise UserError(
-                _('Duplicate Entry Detected.\n\nA Journal Entry (%s) has already been created for the date range %s to %s.') % (
-                    existing_move.name or _('Draft'),
-                    target_date_from,
-                    target_date_to
-                ))
+            raise UserError(_(
+                'Date Range Overlap Detected.\n\n'
+                'A Journal Entry (%s) already exists for the overlapping period (%s to %s).\n'
+                'You cannot fetch entries for dates that have already been synced.'
+            ) % (
+                                existing_move.name or _('Draft'),
+                                existing_move.voucher_date_from,
+                                existing_move.voucher_date_to,
+                            ))
 
         token = self._get_api_token()
         entries = self._fetch_journal_entries(token, target_date_from, target_date_to)
@@ -134,13 +138,11 @@ class VoucherFetchWizard(models.TransientModel):
             raise UserError(
                 _('Unmapped Accounts Detected.\n\nThe following external accounts are missing in the Chart of Accounts mapping:\n\n%s\n\nPlease set the "API Account Code" on the respective accounts before proceeding.') % missing_msg)
 
-        glowsims_journal = self.env['account.journal'].search([('name', 'ilike', 'glowsims')], limit=1)
-        if not glowsims_journal:
-            glowsims_journal = self.env['account.journal'].search([('type', '=', 'general')], limit=1)
+        glowsims_journal = self.env['account.journal'].search([('name', 'ilike', 'GLOWSIMS')], limit=1)
 
         if not glowsims_journal:
             raise UserError(
-                _('Configuration Error.\n\nNo suitable General Journal was found to register the synchronized entries. Please configure a journal.'))
+                _('Configuration Error.\n\nNo journal found with the name "GLOWSIMS". Please create or configure the required journal.'))
 
         move_lines = []
         for code in active_codes:
