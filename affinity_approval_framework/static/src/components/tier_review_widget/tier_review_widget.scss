@@ -1,0 +1,96 @@
+.modern-review-container {
+    padding: 0 !important;
+    width: 100%;
+}
+
+.modern-review-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border: none !important;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.modern-review-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.modern-review-header {
+    padding: 16px 20px !important;
+    background: #f8fafc !important;
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+    outline: none !important;
+}
+
+.modern-review-header:focus,
+.modern-review-header:active {
+    outline: none !important;
+}
+
+.modern-review-header a,
+.modern-review-header a:focus,
+.modern-review-header a:active {
+    color: #1e293b !important;
+    font-size: 1.1rem;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.modern-review-header:not(.collapsed) {
+    border-bottom: 1px solid #edf2f9;
+}
+
+.modern-chevron {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.modern-review-header.collapsed .modern-chevron {
+    transform: rotate(180deg);
+}
+
+.modern-review-content-wrapper {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modern-review-content-wrapper.collapsed {
+    grid-template-rows: 0fr;
+}
+
+.modern-review-content {
+    overflow: hidden;
+}
+
+.modern-review-table {
+    margin: 0;
+    width: 100%;
+    min-width: 600px;
+}
+
+.modern-review-table thead th {
+    background-color: #ffffff;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 14px 16px;
+    border-bottom: 2px solid #edf2f9;
+}
+
+.modern-review-table tbody td {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    font-size: 0.95rem;
+}
+
+.modern-review-table tbody tr:last-child td {
+    border-bottom: none;
+}

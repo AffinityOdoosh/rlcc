@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="view_account_move_search_inherit_approval" model="ir.ui.view">
+            <field name="name">account.move.search.inherit.approval</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search" position="inside">
+                    <filter name="needs_review" string="Needs my Review"
+                            domain="[('reviewer_ids', 'in', uid), ('state', 'not in', ['posted', 'cancel'])]"
+                            help="My Invoices/Moves to review"/>
+                    <filter name="tier_validated" string="Validated" domain="[('validated', '=', True)]"
+                            help="Invoices/Moves validated and ready to be confirmed"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

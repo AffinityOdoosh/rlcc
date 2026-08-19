@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <template id="tier_validation_buttons">
+        <div>
+            <field name="validation_status" invisible="1"/>
+            <button name="request_validation" string="Request Validation"
+                    t-attf-invisible="not need_validation or validation_status == 'rejected' or hide_reviews"
+                    type="object" class="btn-primary fw-bold" icon="fa-paper-plane"/>
+            <button name="restart_validation" string="Restart Validation" invisible="not review_ids or hide_reviews"
+                    type="object" class="btn-secondary" icon="fa-refresh"/>
+        </div>
+    </template>
+
+    <template id="tier_validation_label">
+        <div class="mt-2 mb-3">
+            <div class="alert alert-warning d-flex align-items-center justify-content-between shadow-sm border-0 rounded-3 mb-0"
+                 role="alert"
+                 t-attf-invisible="validation_status == 'validated' or hide_reviews or validation_status == 'rejected' or not review_ids">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3"
+                         style="width: 40px; height: 40px;">
+                        <i class="fa fa-lg fa-hourglass-half text-warning"/>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold text-dark">Validation Pending</h6>
+                        <small class="text-muted d-flex align-items-center mt-1">
+                            This record requires review.
+                            <span class="ms-1 fw-semibold text-dark">
+                                <field name="next_review" readonly="1"/>
+                            </span>
+                        </small>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button name="validate_tier" string="Approve" invisible="not can_review" type="object"
+                            class="btn btn-success fw-bold shadow-sm d-flex align-items-center" icon="fa-check"/>
+                    <button name="reject_tier" string="Reject" invisible="not can_review" type="object"
+                            class="btn btn-outline-danger fw-bold shadow-sm d-flex align-items-center" icon="fa-times"/>
+                </div>
+            </div>
+            <div class="alert alert-success d-flex align-items-center shadow-sm border-0 rounded-3 mb-0 py-3"
+                 role="alert"
+                 t-attf-invisible="validation_status != 'validated' or hide_reviews or not review_ids">
+                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3"
+                     style="width: 40px; height: 40px;">
+                    <i class="fa fa-lg fa-check text-success"/>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold text-success">Approved Successfully</h6>
+                    <small class="text-muted mt-1 d-block">Operation has been <b>validated</b> and finalized.
+                    </small>
+                </div>
+            </div>
+
+            <div class="alert alert-danger d-flex align-items-center shadow-sm border-0 rounded-3 mb-0 py-3"
+                 role="alert"
+                 t-attf-invisible="validation_status != 'rejected' or hide_reviews or not review_ids">
+                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3"
+                     style="width: 40px; height: 40px;">
+                    <i class="fa fa-lg fa-times text-danger"/>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold text-danger">Validation Rejected</h6>
+                    <small class="text-muted mt-1 d-block">Operation has been <b>rejected</b> by the reviewer.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tier_validation_reviews">
+        <field name="review_ids" widget="tier_validation" invisible="not review_ids" class="w-100 mt-1">
+            <list>
+                <field name="name"/>
+                <field name="sequence"/>
+                <field name="requested_by"/>
+                <field name="status"/>
+                <field name="display_status"/>
+                <field name="todo_by"/>
+                <field name="done_by"/>
+                <field name="reviewed_date"/>
+                <field name="reviewed_formated_date"/>
+                <field name="comment"/>
+            </list>
+        </field>
+    </template>
+</odoo>
