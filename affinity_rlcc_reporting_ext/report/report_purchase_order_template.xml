@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data>
+        <template id="report_purchase_order_main_template">
+            <t t-set="primary_color" t-value="'#5E1756'"/>
+            <t t-set="has_taxes" t-value="any(line.taxes_id for line in o.order_line)"/>
+            <div class="page" style="font-size: 14px; position: relative;">
+                <t t-if="o.state == 'cancel'">
+                    <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none;"
+                         viewBox="0 0 1000 800">
+                        <text x="500" y="400"
+                              text-anchor="middle"
+                              dominant-baseline="middle"
+                              transform="rotate(-45, 500, 400)"
+                              style="font-size:150px; font-weight:900; fill:#DC3545; fill-opacity:0.2; letter-spacing:10px; text-transform:uppercase;">
+                            CANCELLED
+                        </text>
+                    </svg>
+                </t>
+                <div t-attf-style="border-bottom:3px solid {{primary_color}}; padding-bottom:10px; margin-bottom:30px;">
+                    <h2 class="text-center fw-bold text-uppercase mb-0"
+                        t-attf-style="color:{{primary_color}}; letter-spacing:2px;">
+                        <span t-if="o.state in ['draft', 'sent']">Request for Quotation</span>
+                        <span t-if="o.state not in ['draft', 'sent']">Purchase Order</span>
+                    </h2>
+                </div>
+                <div style="background:#F5F7FA;border:1px solid #D9E2EC;border-radius:8px;padding:18px 22px;margin-bottom:30px;">
+                    <div class="row align-items-center">
+                        <div class="col-4">
+                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                <span t-if="o.state in ['draft', 'sent']">RFQ No.</span>
+                                <span t-if="o.state not in ['draft', 'sent']">Order No.</span>
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
+                                <span t-field="o.name"/>
+                            </div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Vendor
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
+                                <span t-field="o.partner_id.name"/>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Order Date
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
+                                <span t-field="o.date_order"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="table mb-0"
+                       style="font-size:14px; border:1px solid #d7dee8; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:8px 8px 0 0;">
+                    <thead t-attf-style="background:{{primary_color}};">
+                        <tr>
+                            <th class="text-center py-3 ps-3 text-uppercase"
+                                style="border:none; border-right:1px solid rgba(255,255,255,0.15); font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
+                                Product
+                            </th>
+                            <th class="text-center py-3 ps-3 text-uppercase"
+                                style="border:none; border-right:1px solid rgba(255,255,255,0.15); font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
+                                Description
+                            </th>
+                            <th class="text-center py-3 text-uppercase"
+                                style="border:none; border-right:1px solid rgba(255,255,255,0.15); font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
+                                Qty
+                            </th>
+                            <th class="text-center py-3 text-uppercase"
+                                style="border:none; border-right:1px solid rgba(255,255,255,0.15); font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
+                                Unit Price
+                            </th>
+                            <t t-if="has_taxes">
+                                <th class="text-center py-3 pe-3 text-uppercase"
+                                    style="border:none; border-right:1px solid #d7dee8; font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
+                                    Taxes
+                                </th>
+                            </t>
+                            <th class="text-center py-3 pe-3 text-uppercase"
+                                style="border:none; border-right:1px solid #d7dee8; font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
+                                Amount
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.order_line" t-as="line"
+                            style="border-bottom:1px solid #d7dee8; background:#ffffff;">
+                            <td class="py-3 ps-3" style="border-right:1px solid #d7dee8;">
+                                <span t-field="line.product_id.display_name"/>
+                            </td>
+                            <td class="py-3 ps-3" style="border-right:1px solid #d7dee8;">
+                                <span t-field="line.name"/>
+                            </td>
+                            <td class="py-3 text-center" style="color:#495057; border-right:1px solid #d7dee8;">
+                                <span t-field="line.product_qty"/>
+                                <span t-field="line.product_uom" groups="uom.group_uom"/>
+                            </td>
+                            <td class="py-3 text-end" style="color:#1f2937; border-right:1px solid #d7dee8;">
+                                <span t-field="line.price_unit" t-options='{"widget": "float", "precision": 2}'/>
+                            </td>
+                            <t t-if="has_taxes">
+                                <td class="py-3 pe-3 text-end" style="color:#1f2937; border-right:1px solid #d7dee8;">
+                                    <span t-esc="', '.join(map(lambda x: x.name, line.taxes_id))"/>
+                                </td>
+                            </t>
+                            <td class="py-3 pe-3 text-end" style="color:#1f2937; border-right:1px solid #d7dee8;">
+                                <span t-field="line.price_subtotal"
+                                      t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="row mb-5 justify-content-end" style="margin-top:-1px;">
+                    <div class="col-5 ms-auto">
+                        <table class="table mb-0"
+                               style="font-size:14px; border:1px solid #d7dee8; border-top:none; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:0 0 8px 8px;">
+                            <tbody>
+                                <t t-if="o.amount_tax &gt; 0">
+                                    <tr style="background:#eef3f8; border:none;">
+                                        <td class="text-end py-2 pe-3"
+                                            t-attf-style="font-weight:700; color:{{primary_color}}; border:none; border-right:1px solid #d7dee8;">
+                                            Untaxed Amount
+                                        </td>
+                                        <td class="text-end py-2 pe-3"
+                                            t-attf-style="font-weight:700; color:{{primary_color}}; border:none; width:45%;">
+                                            <span t-field="o.amount_untaxed"
+                                                  t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                    <tr style="background:#eef3f8; border:none;">
+                                        <td class="text-end py-2 pe-3"
+                                            t-attf-style="font-weight:700; color:{{primary_color}}; border:none; border-right:1px solid #d7dee8;">
+                                            Taxes
+                                        </td>
+                                        <td class="text-end py-2 pe-3"
+                                            t-attf-style="font-weight:700; color:{{primary_color}}; border:none; width:45%;">
+                                            <span t-field="o.amount_tax"
+                                                  t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr style="background:#eef3f8; border:none;">
+                                    <td class="text-end py-2 pe-3"
+                                        t-attf-style="font-weight:700; color:{{primary_color}}; border:none; border-right:1px solid #d7dee8;">
+                                        TOTAL
+                                    </td>
+                                    <td class="text-end py-2 pe-3"
+                                        t-attf-style="font-weight:700; color:{{primary_color}}; border:none; width:45%;">
+                                        <span t-field="o.amount_total"
+                                              t-options='{"widget":"monetary","display_currency":o.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div t-attf-style="background:#EEF3F8; border-left:5px solid {{primary_color}}; border-radius:8px; padding:18px; margin-bottom:18px;">
+                    <div style="font-size:11px; color:#6B7280; text-transform:uppercase; font-weight:600;">Rupees (In
+                        Words)
+                    </div>
+                    <div style="font-size:15px; color:#1F2937; font-weight:600;">
+                        <span t-esc="o.currency_id.amount_to_text(o.amount_total)"/>
+                    </div>
+                </div>
+                <t t-if="o.notes and not is_html_empty(o.notes)">
+                    <div t-attf-style="background:#EEF3F8; border-left:5px solid {{primary_color}}; border-radius:8px; padding:18px; margin-bottom:18px;">
+                        <div style="font-size:11px; color:#6B7280; text-transform:uppercase; font-weight:600;">Terms
+                            &amp; Conditions / Remarks
+                        </div>
+                        <div style="font-size:15px; color:#1F2937; font-weight:600;">
+                            <span t-field="o.notes"/>
+                        </div>
+                    </div>
+                </t>
+                <div class="row mt-5 pt-5" style="font-size:14px;">
+                    <div class="col-4 text-center">
+                        <div style="height:40px;padding-top:16px;box-sizing:border-box;">
+                            <span t-if="o.user_id" t-field="o.user_id.name"
+                                  style="display:inline-block;color:#1F2937;font-size:14px;font-weight:600;line-height:14px;"/>
+                        </div>
+                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
+                            Purchase Representative
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="height:40px;"/>
+                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
+                            Project Manager
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="height:40px;"/>
+                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
+                            Chairperson
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="report_purchase_order_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="pager" t-value="False"/>
+                    <t t-call="web.external_layout">
+                        <t t-call="affinity_rlcc_reporting_ext.report_purchase_order_main_template"/>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

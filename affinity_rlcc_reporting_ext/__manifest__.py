@@ -16,6 +16,7 @@
         'report/report_payment_voucher_template.xml',
         'report/report_petty_cash_payment_template.xml',
         'report/report_petty_cash_receipt_template.xml',
+        'report/report_purchase_order_template.xml',
         'report/report_receipt_voucher_template.xml',
         'report/ir_actions_report.xml',
     ],

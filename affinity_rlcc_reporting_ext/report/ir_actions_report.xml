@@ -6,6 +6,10 @@
             <field name="binding_model_id" eval="False"/>
         </record>
 
+        <record id="purchase.report_purchase_quotation" model="ir.actions.report">
+            <field name="binding_model_id" eval="False"/>
+        </record>
+
         <record id="action_report_journal_voucher" model="ir.actions.report">
             <field name="name">Journal Voucher</field>
             <field name="model">account.move</field>
@@ -52,6 +56,14 @@
             <field name="binding_model_id" ref="account.model_account_payment"/>
             <field name="binding_type">report</field>
             <field name="domain">[('payment_type', '=', 'inbound')]</field>
+        </record>
+
+        <record id="purchase.action_report_purchase_order" model="ir.actions.report">
+            <field name="name">RFQ / Purchase Order</field>
+            <field name="print_report_name">
+                (object.state in ('draft', 'sent') and 'RFQ - %s' % (object.name)) or 'PO - %s' % (object.name)
+            </field>
+            <field name="report_name">affinity_rlcc_reporting_ext.report_purchase_order_template</field>
         </record>
 
         <record id="action_report_receipt_voucher" model="ir.actions.report">
