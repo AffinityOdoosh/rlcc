@@ -93,8 +93,7 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
         if not self.supplier_id:
             raise UserError(_('Enter a supplier.'))
         supplier = self.supplier_id
-        for key, value in self.env.context.items():
-            print(key, ':', value)
+        
         data = {
             'origin': origin,
             'partner_id': self.supplier_id.id,
