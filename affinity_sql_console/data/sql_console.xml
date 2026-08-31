@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data noupdate="1">
+        <record id="select_res_partner" model="sql.console">
+            <field name="name">Fetch Contact Details</field>
+            <field name="query_statement">SELECT name, phone, email FROM res_partner LIMIT 10;</field>
+        </record>
+
+        <record id="select_versions" model="sql.console">
+            <field name="name">Check PostgreSQL Engine Version</field>
+            <field name="query_statement">SELECT version();</field>
+        </record>
+
+        <record id="select_datname_pg_database" model="sql.console">
+            <field name="name">List System Databases</field>
+            <field name="query_statement">SELECT datname FROM pg_database;</field>
+        </record>
+
+        <record id="select_res_partner_inner_join_sale_order" model="sql.console">
+            <field name="name">Fetch Customer Sales Link</field>
+            <field name="query_statement">SELECT a.name, b.name FROM res_partner a INNER JOIN sale_order b ON a.id =
+                b.partner_id LIMIT 10;
+            </field>
+        </record>
+    </data>
+</odoo>

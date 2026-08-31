@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sql_console_user,sql.console.user,model_sql_console,group_sql_console_user,1,0,0,0
+access_sql_console_manager,sql.console.manager,model_sql_console,group_sql_console_manager,1,1,1,0
+access_sql_console_admin,sql.console.admin,model_sql_console,group_sql_console,1,1,1,1
+access_query_result_report_wizard_user,query.result.report.wizard.user,model_query_result_report_wizard,group_sql_console_user,1,1,1,1
+access_query_result_report_wizard_manager,query.result.report.wizard.manager,model_query_result_report_wizard,group_sql_console_manager,1,1,1,1
+access_query_result_report_wizard_admin,query.result.report.wizard.admin,model_query_result_report_wizard,group_sql_console,1,1,1,1

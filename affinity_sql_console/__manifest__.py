@@ -1,0 +1,33 @@
+# -*- coding: utf-8 -*-
+
+{
+    'name': 'Affinity SQL Console',
+    'author': 'Affinity Business Suite',
+    'website': 'https://affinitysuite.net',
+    'support': 'info@affinitysuite.net',
+    'category': 'Misc',
+    'summary': 'Affinity SQL Console Module',
+    'description': '''Affinity SQL Console Module''',
+    'version': '18.0',
+    'depends': ['mail', 'affinity_report_xlsx'],
+    'data': [
+        'data/ir_module_category.xml',
+        'data/report_paperformat.xml',
+        'data/sql_console.xml',
+        'security/res_groups.xml',
+        'security/ir.model.access.csv',
+        'security/ir_rule.xml',
+        'report/report_query_result_template.xml',
+        'report/ir_actions_report.xml',
+        'wizard/query_result_report_wizard_views.xml',
+        'views/sql_console_views.xml',
+    ],
+    'assets': {},
+    'images': [],
+    'price': 4000000,
+    'currency': 'EUR',
+    'license': 'OPL-1',
+    'application': False,
+    'auto_install': False,
+    'installable': True,
+}

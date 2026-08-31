@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data noupdate="1">
+        <record id="module_category_sql_console" model="ir.module.category">
+            <field name="name">SQL Console</field>
+            <field name="description">Category for managing SQL Console and Custom Reports access security.</field>
+            <field name="sequence">20</field>
+        </record>
+    </data>
+</odoo>

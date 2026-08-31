@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="sql_console_list" model="ir.ui.view">
+            <field name="name">sql.console.list</field>
+            <field name="model">sql.console</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name" string="Description / Purpose"/>
+                    <field name="query_statement" string="Query Statement" optional="show"/>
+                    <field name="raw_row_count" string="Total Records" widget="badge"
+                           decoration-danger="raw_row_count &gt; 1000"
+                           decoration-success="raw_row_count &lt;= 1000"/>
+                    <field name="execution_time" readonly="1" optional="hide"/>
+                    <field name="last_executed_by" string="Executed By" optional="hide"/>
+                    <field name="last_execution_date" string="Executed On" optional="hide"/>
+                    <field name="is_report" widget="boolean_toggle" optional="hide"/>
+                    <field name="state" widget="badge" decoration-success="state == 'success'"
+                           decoration-danger="state == 'error'" decoration-info="state == 'draft'"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="sql_console_report_list" model="ir.ui.view">
+            <field name="name">sql.console.report.list</field>
+            <field name="model">sql.console</field>
+            <field name="arch" type="xml">
+                <list create="false" delete="false">
+                    <field name="report_title" string="Report Title"/>
+                    <field name="raw_row_count" string="Total Records" widget="badge"
+                           decoration-danger="raw_row_count &gt; 1000"
+                           decoration-success="raw_row_count &lt;= 1000"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="sql_console_form" model="ir.ui.view">
+            <field name="name">sql.console.form</field>
+            <field name="model">sql.console</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="execute" type="object" string="Execute Query" class="btn btn-primary"/>
+                        <button name="action_open_export_wizard" string="Export PDF/XLSX" type="object"
+                                class="btn btn-secondary"
+                                invisible="not has_valid_select_result"/>
+                        <field name="state" invisible="state == 'error'" widget="statusbar"
+                               statusbar_visible="draft,success"/>
+                        <field name="state" invisible="state != 'error'" widget="statusbar"
+                               statusbar_visible="draft,error"/>
+                    </header>
+                    <sheet>
+                        <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="e.g. Fetch Active System Users"/>
+                            </h1>
+                        </div>
+                        <group invisible="state == 'draft'">
+                            <group string="Execution Metadata">
+                                <field name="last_executed_by" readonly="1" options="{'no_open': True}"/>
+                                <field name="last_execution_date" readonly="1"/>
+                            </group>
+                            <group string="Performance Metrics">
+                                <field name="row_count" readonly="1" class="fw-bold text-info"
+                                       invisible="not row_count"/>
+                                <field name="execution_time" readonly="1"/>
+                                <field name="active" invisible="1"/>
+                                <field name="has_valid_select_result" invisible="1"/>
+                            </group>
+                        </group>
+                        <group string="General Settings" invisible="not has_valid_select_result">
+                            <field name="is_report" widget="boolean_toggle"/>
+                        </group>
+                        <group string="SQL Command" name="sql_command_group" colspan="4">
+                            <div class="w-100 d-flex flex-row gap-3" colspan="2">
+                                <field name="query_statement" class="w-100" widget="code"
+                                       placeholder="SELECT * FROM res_partner;"
+                                       style="min-height: 180px; width: 100%;"/>
+                            </div>
+                        </group>
+                        <notebook>
+                            <page string="Execution Results" name="results" invisible="not query_result">
+                                <div style="width: 100%; overflow-x: auto;">
+                                    <field name="query_result" readonly="1" nolabel="1" widget="html"/>
+                                </div>
+                            </page>
+                            <page string="Report Configuration" name="report_configuration"
+                                  invisible="not is_report or not has_valid_select_result">
+                                <group>
+                                    <group string="Display Information">
+                                        <field name="report_title" placeholder="e.g. Active Users Detailed Report"/>
+                                    </group>
+                                    <group string="Access Control (Visibility)">
+                                        <field name="allowed_user_ids" widget="many2many_tags"
+                                               options="{'no_create': True}"/>
+                                        <field name="allowed_group_ids" widget="many2many_tags"
+                                               options="{'no_create': True}"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="sql_console_report_form" model="ir.ui.view">
+            <field name="name">sql.console.report.form</field>
+            <field name="model">sql.console</field>
+            <field name="arch" type="xml">
+                <form create="false" edit="false" delete="false">
+                    <header>
+                        <button name="execute" type="object" string="Refresh Report" class="btn btn-primary"/>
+                        <button name="action_open_export_wizard" string="Export PDF/XLSX" type="object"
+                                class="btn btn-secondary"
+                                invisible="not query_result_report"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="report_title" readonly="1" invisible="not report_title"/>
+                                <field name="name" readonly="1" invisible="report_title"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Report Summary">
+                                <field name="last_execution_date" string="Last Updated" readonly="1"/>
+                                <field name="row_count" string="Total Records" readonly="1" class="fw-bold text-info"/>
+                                <field name="execution_time" readonly="1"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Report Output" name="results">
+                                <div style="width: 100%; overflow-x: auto;">
+                                    <field name="query_result_report" readonly="1" nolabel="1" widget="html"/>
+                                </div>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="sql_console_search" model="ir.ui.view">
+            <field name="name">sql.console.search</field>
+            <field name="model">sql.console</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name" string="Description / Purpose"/>
+                    <field name="report_title" string="Report Title"/>
+                    <field name="query_statement" string="Query Statement"/>
+                    <field name="last_executed_by"/>
+                    <filter name="published_reports" string="Is Report" domain="[('is_report', '=', True)]"/>
+                    <filter name="success_queries" string="Successful" domain="[('state', '=', 'success')]"/>
+                    <filter name="failed_queries" string="Failed" domain="[('state', '=', 'error')]"/>
+                    <separator/>
+                    <filter name="active" string="Active Queries" domain="[('active', '=', True)]"/>
+                    <filter name="archive" string="Archived Queries" domain="[('active', '=', False)]"/>
+                    <group name="group_by" string="Group by">
+                        <filter name="state" string="Status" context="{'group_by': 'state'}"/>
+                        <filter name="executed_by" string="Executed By" context="{'group_by': 'last_executed_by'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="sql_console_action" model="ir.actions.act_window">
+            <field name="name">Queries</field>
+            <field name="res_model">sql.console</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <record id="sql_console_reports_action" model="ir.actions.act_window">
+            <field name="name">Custom Reports</field>
+            <field name="res_model">sql.console</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'is_report_mode': True}</field>
+            <field name="domain">[('is_report', '=', True)]</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'list', 'view_id': ref('sql_console_report_list')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('sql_console_report_form')})]"/>
+        </record>
+
+        <menuitem id="sql_console_root"
+                  name="SQL Console"
+                  groups="affinity_sql_console.group_sql_console_user"
+                  sequence="-1"
+                  web_icon="affinity_sql_console,static/description/icon.png"/>
+
+        <menuitem id="sql_console_menu"
+                  name="Query Tool"
+                  parent="affinity_sql_console.sql_console_root"
+                  action="affinity_sql_console.sql_console_action"
+                  groups="affinity_sql_console.group_sql_console_manager"
+                  sequence="10"/>
+
+        <menuitem id="sql_console_user_reports_menu"
+                  name="Reports"
+                  parent="affinity_sql_console.sql_console_root"
+                  action="sql_console_reports_action"
+                  groups="affinity_sql_console.group_sql_console_user"
+                  sequence="20"/>
+    </data>
+</odoo>

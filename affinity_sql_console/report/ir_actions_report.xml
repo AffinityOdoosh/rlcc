@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="action_report_query_result_xlsx" model="ir.actions.report">
+            <field name="name">SQL Query Result XLSX</field>
+            <field name="model">query.result.report.wizard</field>
+            <field name="report_type">xlsx</field>
+            <field name="report_name">report_query_result</field>
+            <field name="report_file">report_query_result</field>
+            <field name="print_report_name">'SQL Query - %s' % (object.query_id.name or 'Report')</field>
+        </record>
+
+        <record id="action_report_query_result_pdf" model="ir.actions.report">
+            <field name="name">SQL Query Result PDF</field>
+            <field name="model">query.result.report.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">affinity_sql_console.report_query_result_template</field>
+            <field name="report_file">affinity_sql_console.report_query_result_template</field>
+            <field name="print_report_name">'SQL Query - %s' % (object.query_id.name or 'Report')</field>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="paperformat_query_result"/>
+        </record>
+    </data>
+</odoo>

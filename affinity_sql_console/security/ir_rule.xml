@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="sql_console_report_visibility_rule" model="ir.rule">
+            <field name="name">SQL Console: Report User Visibility</field>
+            <field name="model_id" ref="model_sql_console"/>
+            <field name="groups" eval="[(4, ref('affinity_sql_console.group_sql_console_user'))]"/>
+            <field name="domain_force">[
+                ('is_report', '=', True),
+                '|',
+                ('allowed_user_ids', 'in', [user.id]),
+                ('allowed_group_ids', 'in', user.groups_id.ids)
+                ]
+            </field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="sql_console_manager_rule" model="ir.rule">
+            <field name="name">SQL Console: Manager &amp; Admin Full Access</field>
+            <field name="model_id" ref="model_sql_console"/>
+            <field name="groups" eval="[(4, ref('affinity_sql_console.group_sql_console_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+    </data>
+</odoo>

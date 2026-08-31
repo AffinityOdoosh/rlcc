@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="query_result_report_wizard_view_form" model="ir.ui.view">
+            <field name="name">query.result.report.wizard.form</field>
+            <field name="model">query.result.report.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Export Query Results">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="query_id" invisible="1"/>
+                                <field name="is_report_mode" invisible="1"/>
+                                <field name="pdf_orientation" widget="radio" options="{'horizontal': true}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button string="Export PDF" name="generate_pdf_report" type="object" class="btn-primary"/>
+                        <button string="Export XLSX" name="generate_excel_report" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

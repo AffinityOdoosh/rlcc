@@ -9,7 +9,7 @@
     'summary': 'Affinity RLCC Reporting Extension Module',
     'description': '''Affinity RLCC Reporting Extension Module''',
     'version': '18.0',
-    'depends': ['affinity_rlcc_ext'],
+    'depends': ['affinity_report_xlsx', 'affinity_rlcc_ext'],
     'data': [
         'report/external_layout_standard_template.xml',
         'report/report_grn_template.xml',

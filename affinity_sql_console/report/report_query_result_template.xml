@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="report_query_result_main_template">
+            <div class="header"/>
+            <div class="article">
+                <t t-set="report_data" t-value="doc._get_report_data()"/>
+                <t t-set="headers" t-value="report_data.get('headers', [])"/>
+                <t t-set="bodies" t-value="report_data.get('datas', [])"/>
+                <t t-set="field_types" t-value="report_data.get('field_types', [])"/>
+                <t t-set="currency_symbol" t-value="res_company.currency_id.symbol or '$'"/>
+                <t t-set="report_title"
+                   t-value="doc.query_id.report_title or doc.query_id.name if doc.is_report_mode else 'SQL QUERY RESULT'"/>
+                <div style="background-color: #714B67; color: #ffffff; padding: 12px 18px; border-radius: 6px; margin-bottom: 20px; text-align: center;">
+                    <h2 style="margin: 0; font-size: 18px; font-weight: bold; color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; text-align: center;">
+                        <t t-out="report_title.upper()"/>
+                    </h2>
+                </div>
+                <t t-if="not doc.is_report_mode">
+                    <div style="background-color: #F8FAFC; border-radius: 8px; padding: 14px 18px; margin-bottom: 25px; border-left: 4px solid #714B67; border-right: 4px solid #714B67;">
+                        <table style="width: 100%; border-collapse: collapse; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; border: 1px solid transparent;">
+                            <tr style="border: 1px solid transparent; background: transparent;">
+                                <td style="padding: 4px 8px; width: 12%; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748B; font-weight: 600; border: 1px solid transparent;">
+                                    Executed By
+                                </td>
+                                <td style="padding: 4px 8px; width: 38%; font-size: 11px; font-weight: 600; color: #1E293B; border: 1px solid transparent;">
+                                    <t t-out="report_data.get('executed_by', '')"/>
+                                </td>
+                                <td style="padding: 4px 8px; width: 14%; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748B; font-weight: 600; border: 1px solid transparent;">
+                                    Execution Date
+                                </td>
+                                <td style="padding: 4px 8px; width: 36%; font-size: 11px; font-weight: 600; color: #1E293B; border: 1px solid transparent;">
+                                    <t t-out="report_data.get('execution_date', '')"/>
+                                </td>
+                            </tr>
+                            <tr style="border: 1px solid transparent; background: transparent;">
+                                <td style="padding: 4px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748B; font-weight: 600; border: 1px solid transparent;">
+                                    Execution Time
+                                </td>
+                                <td style="padding: 4px 8px; font-size: 11px; font-weight: 600; color: #1E293B; border: 1px solid transparent;">
+                                    <t t-out="report_data.get('execution_time', '')"/>
+                                </td>
+                                <td style="padding: 4px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748B; font-weight: 600; border: 1px solid transparent;">
+                                    Rows Processed
+                                </td>
+                                <td style="padding: 4px 8px; font-size: 11px; font-weight: 600; color: #1E293B; border: 1px solid transparent;">
+                                    <span style="background-color: #E2E8F0; padding: 2px 8px; border-radius: 12px; font-size: 10px; color: #0F172A;">
+                                        <t t-out="report_data.get('row_count', 0)"/>
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+                <div t-if="headers and bodies" style="width: 100%;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                        <thead>
+                            <tr style="background-color: #714B67; color: #ffffff;">
+                                <th style="padding: 8px 10px; text-align: center; font-weight: 600; border: 1px solid #dee2e6; width: 40px;">
+                                    #
+                                </th>
+                                <t t-foreach="headers" t-as="header">
+                                    <th style="padding: 8px 10px; text-align: center; font-weight: 600; border: 1px solid #dee2e6; white-space: nowrap;">
+                                        <t t-out="str(header)"/>
+                                    </th>
+                                </t>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="bodies" t-as="body">
+                                <tr t-att-style="'background-color: %s;' % ('#ffffff' if body_index % 2 == 0 else '#f8f9fa')">
+                                    <td style="padding: 6px 10px; text-align: center; font-weight: 600; color: #6c757d; border: 1px solid #dee2e6;">
+                                        <t t-out="body_index + 1"/>
+                                    </td>
+                                    <t t-foreach="body" t-as="value">
+                                        <t t-set="is_monetary"
+                                           t-value="doc.is_report_mode and value_index &lt; len(field_types) and field_types[value_index] == 'monetary'"/>
+                                        <td t-att-style="'padding: 6px 10px; color: #212529; border: 1px solid #dee2e6; white-space: nowrap; text-align: %s;' % ('right' if is_monetary else 'center')">
+                                            <t t-if="is_monetary and value is not None and isinstance(value, (int, float))">
+                                                <t t-out="currency_symbol"/>
+                                                <t t-out="'{:,.2f}'.format(float(value))"/>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-out="str(value) if (value is not None) else ''"/>
+                                            </t>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </t>
+                            <!-- Summary / Total Row -->
+                            <t t-if="doc.is_report_mode and bodies">
+                                <tr style="background-color: #E2E8F0; font-weight: bold; color: #1E293B;">
+                                    <td style="padding: 8px 10px; text-align: center; border: 1px solid #CBD5E1; font-weight: bold;">
+                                        Total
+                                    </td>
+                                    <t t-foreach="headers" t-as="hdr">
+                                        <t t-set="col_idx" t-value="hdr_index"/>
+                                        <t t-set="is_monetary_col"
+                                           t-value="col_idx &lt; len(field_types) and field_types[col_idx] == 'monetary'"/>
+                                        <td t-att-style="'padding: 8px 10px; border: 1px solid #CBD5E1; font-weight: bold; white-space: nowrap; text-align: %s;' % ('right' if is_monetary_col else 'center')">
+                                            <t t-if="is_monetary_col">
+                                                <t t-set="col_sum"
+                                                   t-value="sum(float(row[col_idx] or 0.0) for row in bodies if row[col_idx] is not None and isinstance(row[col_idx], (int, float)))"/>
+                                                <t t-out="currency_symbol"/>
+                                                <t t-out="'{:,.2f}'.format(col_sum)"/>
+                                            </t>
+                                            <t t-else="">
+                                                <span style="color: #64748B;">-</span>
+                                            </t>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="footer"/>
+        </template>
+
+        <template id="report_query_result_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="affinity_sql_console.report_query_result_main_template"/>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>
