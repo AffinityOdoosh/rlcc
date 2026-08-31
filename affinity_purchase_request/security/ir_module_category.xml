@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<odoo>
+    <data>
+        <record id="module_category_purchase_request" model="ir.module.category">
+            <field name="name">Purchase Request</field>
+            <field name="sequence">10</field>
+        </record>
+    </data>
+</odoo>

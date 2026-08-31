@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data>
+        <template id="report_purchase_request_main_template">
+            <t t-set="primary_color" t-value="'#5E1756'"/>
+            <t t-set="has_taxes" t-value="any(line.product_uom_id for line in o.line_ids)"/>
+            <div class="page" style="font-size: 14px; position: relative;">
+                <t t-if="o.state == 'cancel'">
+                    <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none;"
+                         viewBox="0 0 1000 800">
+                        <text x="500" y="400" text-anchor="middle" dominant-baseline="middle"
+                              transform="rotate(-45, 500, 400)"
+                              style="font-size:150px; font-weight:900; fill:#DC3545; fill-opacity:0.2; letter-spacing:10px; text-transform:uppercase;">
+                            CANCELLED
+                        </text>
+                    </svg>
+                </t>
+                <div t-attf-style="border-bottom:3px solid {{primary_color}}; padding-bottom:10px; margin-bottom:30px;">
+                    <h2 class="text-center fw-bold text-uppercase mb-0"
+                        t-attf-style="color:{{primary_color}}; letter-spacing:2px;">
+                        <span>Purchase Request</span>
+                    </h2>
+                </div>
+                <div style="background:#F5F7FA;border:1px solid #D9E2EC;border-radius:8px;padding:18px 22px;margin-bottom:30px;">
+                    <div class="row align-items-center">
+                        <div class="col-4">
+                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Request No.
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
+                                <span t-field="o.name"/>
+                            </div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Requested By
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
+                                <span t-field="o.requested_by.name"/>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Request Date
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
+                                <span t-field="o.date"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="table mb-0"
+                       style="font-size:14px; border:1px solid #d7dee8; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:8px 8px 0 0;">
+                    <thead t-attf-style="background:{{primary_color}};">
+                        <tr>
+                            <th class="text-center py-3 ps-3 text-uppercase"
+                                style="border:none; border-right:1px solid rgba(255,255,255,0.15); font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
+                                Description
+                            </th>
+                            <th class="text-center py-3 text-uppercase"
+                                style="border:none; border-right:1px solid rgba(255,255,255,0.15); font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
+                                Qty
+                            </th>
+                            <th class="text-center py-3 text-uppercase"
+                                style="border:none; border-right:1px solid rgba(255,255,255,0.15); font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
+                                UoM
+                            </th>
+                            <th class="text-center py-3 pe-3 text-uppercase"
+                                style="border:none; border-right:1px solid #d7dee8; font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
+                                Required Date
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.line_ids" t-as="line"
+                            style="border-bottom:1px solid #d7dee8; background:#ffffff;">
+                            <td class="py-3 ps-3" style="border-right:1px solid #d7dee8;">
+                                <span t-field="line.name"/>
+                            </td>
+                            <td class="py-3 text-center" style="color:#495057; border-right:1px solid #d7dee8;">
+                                <span t-field="line.product_qty"/>
+                            </td>
+                            <td class="py-3 text-center" style="color:#495057; border-right:1px solid #d7dee8;">
+                                <span t-field="line.product_uom_id"/>
+                            </td>
+                            <td class="py-3 pe-3 text-center" style="color:#1f2937; border-right:1px solid #d7dee8;">
+                                <span t-field="line.date_required"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height: 30px;"></div>
+                <t t-if="o.description and not is_html_empty(o.description)">
+                    <div t-attf-style="background:#EEF3F8; border-left:5px solid {{primary_color}}; border-radius:8px; padding:18px; margin-bottom:18px;">
+                        <div style="font-size:11px; color:#6B7280; text-transform:uppercase; font-weight:600;">
+                            Description / Remarks
+                        </div>
+                        <div style="font-size:15px; color:#1F2937; font-weight:600;">
+                            <span t-field="o.description"/>
+                        </div>
+                    </div>
+                </t>
+                <div class="row mt-5 pt-5" style="font-size:14px;">
+                    <div class="col-4 text-center">
+                        <div style="height:40px;padding-top:16px;box-sizing:border-box;">
+                            <span t-if="o.requested_by" t-field="o.requested_by.name"
+                                  style="display:inline-block;color:#1F2937;font-size:14px;font-weight:600;line-height:14px;"/>
+                        </div>
+                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
+                            Requested By
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="height:40px;"/>
+                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
+                            Department Manager
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="height:40px;"/>
+                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
+                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
+                            Authorized By
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="report_purchase_request_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="pager" t-value="False"/>
+                    <t t-call="web.external_layout">
+                        <t t-call="affinity_purchase_request.report_purchase_request_main_template"/>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

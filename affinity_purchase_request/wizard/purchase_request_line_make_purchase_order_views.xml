@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record id="view_purchase_request_line_make_purchase_order" model="ir.ui.view">
+            <field name="name">Purchase Request Line Make Purchase Order</field>
+            <field name="model">purchase.request.line.make.purchase.order</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Create RFQ">
+                    <sheet class="p-0">
+                        <div class="o_form_statusbar px-4 py-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa fa-shopping-cart text-primary fs-3"/>
+                                <div>
+                                    <h4 class="m-0 fw-bold text-dark">Create Request for Quotation</h4>
+                                    <small class="text-muted">Consolidate request lines into a new or existing draft
+                                        purchase order
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-md-6">
+                                    <div class="card h-100 border-0 bg-light shadow-sm">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fa fa-file-text-o text-muted me-2"/>
+                                                <h6 class="card-title m-0 fw-semibold text-uppercase text-muted fs-7">
+                                                    Option A: Append to Existing RFQ
+                                                </h6>
+                                            </div>
+                                            <group class="m-0">
+                                                <field name="purchase_order_id"
+                                                       domain="[('partner_id', '=', supplier_id)]"
+                                                       options="{'no_create': True}" placeholder="Select Draft PO..."/>
+                                                <field name="sync_data_planned" widget="boolean_toggle"/>
+                                            </group>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="card h-100 border-0 bg-light shadow-sm">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fa fa-user-plus text-muted me-2"/>
+                                                <h6 class="card-title m-0 fw-semibold text-uppercase text-muted fs-7">
+                                                    Option B: Create New RFQ
+                                                </h6>
+                                            </div>
+                                            <group class="m-0">
+                                                <field name="supplier_id" options="{'no_create_edit': True}"
+                                                       placeholder="Select Vendor..."/>
+                                            </group>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <h6 class="fw-bold text-dark m-0">
+                                        <i class="fa fa-list-ul me-1 text-primary"/>
+                                        Selected Items to Include
+                                    </h6>
+                                </div>
+                                <field name="item_ids" nolabel="1">
+                                    <list name="Details" create="false" editable="bottom"
+                                          decoration-info="keep_description == True">
+                                        <field name="line_id" column_invisible="1"/>
+                                        <field name="request_id" readonly="1" class="fw-semibold"/>
+                                        <field name="product_id" options="{'no_open': True}"/>
+                                        <field name="name" widget="text"/>
+                                        <field name="product_qty" class="fw-bold"/>
+                                        <field name="product_uom_id" column_invisible="1" groups="!uom.group_uom"/>
+                                        <field name="product_uom_id" groups="uom.group_uom"
+                                               options="{'no_open': True}"/>
+                                        <field name="keep_description" widget="boolean_toggle"/>
+                                    </list>
+                                </field>
+                            </div>
+                        </div>
+                    </sheet>
+                    <footer class="px-4 py-3 bg-light border-top d-flex justify-content-end gap-2">
+                        <button name="make_purchase_order" string="Generate RFQ" type="object"
+                                class="btn btn-primary px-4 rounded-pill shadow-sm" icon="fa-check-circle"/>
+                        <button string="Discard" class="btn btn-secondary rounded-pill px-3" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_purchase_request_line_make_purchase_order" model="ir.actions.act_window">
+            <field name="name">Create RFQ</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.request.line.make.purchase.order</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_purchase_request_line_make_purchase_order"/>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="affinity_purchase_request.model_purchase_request_line"/>
+        </record>
+    </data>
+</odoo>

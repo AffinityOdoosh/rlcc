@@ -12,6 +12,7 @@
     'depends': ['affinity_rlcc_ext'],
     'data': [
         'report/external_layout_standard_template.xml',
+        'report/report_grn_template.xml',
         'report/report_journal_voucher_template.xml',
         'report/report_payment_voucher_template.xml',
         'report/report_petty_cash_payment_template.xml',

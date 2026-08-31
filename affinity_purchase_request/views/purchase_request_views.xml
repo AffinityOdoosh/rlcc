@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data>
+        <record id="view_purchase_request_form" model="ir.ui.view">
+            <field name="name">purchase.request.form</field>
+            <field name="model">purchase.request</field>
+            <field name="arch" type="xml">
+                <form string="Purchase Request">
+                    <header>
+                        <button name="%(action_purchase_request_line_make_purchase_order)d" string="Create RFQ"
+                                type="action" class="oe_highlight" invisible="state not in ('approved')"/>
+                        <button name="action_approved" string="Approve" type="object" class="oe_highlight"
+                                invisible="state not in ('draft')"
+                                groups="affinity_purchase_request.group_purchase_request_manager,affinity_purchase_request.group_purchase_request_user"/>
+                        <button name="action_draft" string="Reset to Draft" type="object"
+                                invisible="state not in ('cancel')"
+                                groups="affinity_purchase_request.group_purchase_request_manager,affinity_purchase_request.group_purchase_request_user"/>
+                        <button name="action_cancel" string="Cancel" type="object" invisible="state not in ('approved')"
+                                groups="affinity_purchase_request.group_purchase_request_manager,affinity_purchase_request.group_purchase_request_user"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,approved"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button type="object" name="action_view_purchase_request_line" class="oe_stat_button"
+                                    invisible="line_count == 0" icon="fa-list">
+                                <field name="line_count" widget="statinfo" string="Lines"/>
+                            </button>
+                            <button type="object" name="action_view_purchase_order" class="oe_stat_button"
+                                    invisible="purchase_count == 0" icon="fa-shopping-cart">
+                                <field name="purchase_count" widget="statinfo" string="Orders"/>
+                            </button>
+                            <button type="object" name="action_view_stock_picking" class="oe_stat_button"
+                                    invisible="move_count == 0" groups="stock.group_stock_manager" icon="fa-truck">
+                                <field name="move_count" widget="statinfo" string="Pickings"/>
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="name" class="oe_inline" invisible="not id" readonly="1"
+                                       placeholder="PR Reference..."/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="General Information">
+                                <field name="is_editable" invisible="1"/>
+                                <field name="requested_by" widget="many2one_avatar_user" readonly="1"/>
+                                <field name="assigned_to" options="{'no_create': True}" invisible="1"/>
+                                <field name="picking_type_id" readonly="not is_editable" invisible="1"/>
+                                <field name="location_id" readonly="1" invisible="1"/>
+                                <field name="description" placeholder="Add detailed notes or justification..."
+                                       readonly="not is_editable"/>
+                            </group>
+                            <group string="Tracking &amp; Logistics">
+                                <field name="date" readonly="not is_editable"/>
+                                <field name="approved_date" invisible="state != 'approved'" readonly="1"/>
+                                <field name="origin" placeholder="e.g. SO001" readonly="not is_editable"/>
+                                <field name="group_id" readonly="not is_editable" groups="base.group_no_one"/>
+                                <field name="company_id" invisible="1"/>
+                                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"
+                                       readonly="not is_editable"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Products" name="products">
+                                <field name="line_ids" readonly="not is_editable">
+                                    <list decoration-muted="cancelled == True" editable="bottom">
+                                        <field name="product_id" required="1"/>
+                                        <field name="name"/>
+                                        <field name="product_qty"/>
+                                        <field name="product_uom_category_id" column_invisible="1"/>
+                                        <field name="product_uom_id" column_invisible="1" groups="!uom.group_uom"/>
+                                        <field name="product_uom_id" groups="uom.group_uom"/>
+                                        <field name="analytic_distribution" widget="analytic_distribution"
+                                               groups="analytic.group_analytic_accounting"
+                                               options="{'product_field': 'product_id', 'business_domain': 'purchase_order'}"
+                                               optional="hide"/>
+                                        <field name="date_required"/>
+                                        <field name="estimated_cost" widget="monetary"/>
+                                        <field name="currency_id" column_invisible="1"/>
+                                        <field name="cancelled" column_invisible="1"/>
+                                        <field name="is_editable" column_invisible="1"/>
+                                        <field name="purchased_qty" optional="show"/>
+                                        <field name="purchase_state" widget="badge"
+                                               decoration-success="purchase_state == 'done'"
+                                               decoration-muted="purchase_state == 'draft'"
+                                               decoration-info="purchase_state in ('sent', 'purchase')"
+                                               decoration-warning="purchase_state == 'to_approve'"
+                                               decoration-danger="purchase_state == 'cancelled'" optional="show"/>
+                                        <button name="action_show_details" type="object" icon="fa-list"
+                                                title="Show Details" width="0.1" options='{"warn": true}'/>
+                                    </list>
+                                </field>
+                                <group>
+                                    <group>
+                                        <field name="notes" colspan="2" nolabel="1"
+                                               placeholder="Define your terms and conditions ..."/>
+                                    </group>
+                                    <group class="oe_subtotal_footer">
+                                        <field name="tax_totals" widget="account-tax-totals-field" nolabel="1"
+                                               readonly="1"/>
+                                    </group>
+                                </group>
+                                <div class="clearfix"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_purchase_request_tree" model="ir.ui.view">
+            <field name="name">purchase.request.list</field>
+            <field name="model">purchase.request</field>
+            <field name="arch" type="xml">
+                <list decoration-bf="message_needaction==True" decoration-info="state in ('draft')"
+                      name="Purchase Request" multi_edit="1" sample="1">
+                    <field name="message_needaction" column_invisible="1"/>
+                    <field name="name" decoration-bf="1"/>
+                    <field name="date"/>
+                    <field name="requested_by" widget="many2one_avatar_user"/>
+                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"
+                           optional="hide"/>
+                    <field name="activity_ids" widget="list_activity" optional="show"/>
+                    <field name="origin" optional="show"/>
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="estimated_cost" widget="monetary" sum="Total Cost" optional="show"/>
+                    <field name="state" widget="badge" decoration-success="state in ('done', 'approved')"
+                           decoration-muted="state == 'draft'" decoration-danger="state == 'cancel'"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_purchase_request_search" model="ir.ui.view">
+            <field name="name">purchase.request.list.select</field>
+            <field name="model">purchase.request</field>
+            <field name="arch" type="xml">
+                <search string="Search Purchase Request">
+                    <field name="name" string="Purchase Request" filter_domain="[('name', 'ilike', self)]"/>
+                    <field name="product_id"/>
+                    <field name="state"/>
+                    <field name="requested_by"/>
+                    <field name="assigned_to"/>
+                    <field name="picking_type_id"/>
+                    <separator/>
+                    <filter name="my_requests" string="My Requests" domain="[('requested_by', '=', uid)]"/>
+                    <filter name="assigned_to_me" string="Assigned to Me" domain="[('assigned_to', '=', uid)]"/>
+                    <filter name="unassigned" string="Unassigned" domain="[('assigned_to', '=', False)]"/>
+                    <separator/>
+                    <filter name="state_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                    <filter name="state_approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                    <filter name="state_cancel" string="Cancelled" domain="[('state', '=', 'cancel')]"/>
+                    <separator/>
+                    <filter name="message_needaction" string="Unread Messages"
+                            domain="[('message_needaction', '=', True)]"/>
+                    <group expand="0" string="Group By">
+                        <filter name="requested_by" string="Requested by" icon="fa-user"
+                                context="{'group_by': 'requested_by'}"/>
+                        <filter name="assigned_to" string="Assigned to" icon="fa-user"
+                                context="{'group_by': 'assigned_to'}"/>
+                        <filter name="source" string="Source" icon="fa-caret-square-o-left"
+                                context="{'group_by': 'origin'}"/>
+                        <filter name="start_date" string="Start Date" icon="fa-calendar"
+                                context="{'group_by': 'date'}"/>
+                        <filter name="state" string="Status" icon="fa-tasks" context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_purchase_request_kanban" model="ir.ui.view">
+            <field name="name">purchase.request.kanban</field>
+            <field name="model">purchase.request</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile" quick_create="false" sample="1">
+                    <field name="name"/>
+                    <field name="requested_by" readonly="1"/>
+                    <field name="estimated_cost"/>
+                    <field name="state"/>
+                    <field name="date"/>
+                    <field name="currency_id" readonly="1"/>
+                    <field name="activity_state"/>
+                    <progressbar field="activity_state"
+                                 colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
+                    <templates>
+                        <t t-name="card">
+                            <div class="d-flex align-items-baseline">
+                                <field name="requested_by" widget="many2one_avatar_user" class="fw-bolder fs-5 me-2"/>
+                                <field name="estimated_cost" widget="monetary" class="fw-bolder ms-auto flex-shrink-0"/>
+                            </div>
+                            <footer class="align-items-end">
+                                <div class="d-flex flex-wrap gap-1 text-nowrap">
+                                    <field name="name" class="fw-bold"/>
+                                    <field name="date" options="{'show_time': false}"/>
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                </div>
+                                <field name="state" widget="label_selection"
+                                       options="{'classes': {'draft': 'default', 'cancel': 'danger', 'approved': 'success'}}"
+                                       class="ms-auto"/>
+                            </footer>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="purchase_request_form_action">
+            <field name="name">Purchase Requests</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.request</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="context">{"search_default_requested_by": uid}</field>
+            <field name="search_view_id" ref="view_purchase_request_search"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to start a new purchase request process.
+                </p>
+                <p>
+                    A purchase request is an instruction to Purchasing to procure a certain quantity of materials or
+                    services.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="parent_menu_purchase_request"
+                  name="Purchase Requests"
+                  groups="group_purchase_request_user,group_purchase_request_manager"
+                  sequence="22"
+                  web_icon="affinity_purchase_request,static/description/icon.png"/>
+
+        <menuitem id="menu_purchase_request"
+                  name="Purchase Requests"
+                  parent="parent_menu_purchase_request"
+                  groups="group_purchase_request_user,group_purchase_request_manager"/>
+
+        <menuitem id="menu_purchase_request_act"
+                  parent="menu_purchase_request"
+                  action="purchase_request_form_action"
+                  sequence="10"/>
+
+        <menuitem id="menu_purchase_request_pro_mgt"
+                  parent="purchase.menu_procurement_management"
+                  action="purchase_request_form_action"/>
+    </data>
+</odoo>
