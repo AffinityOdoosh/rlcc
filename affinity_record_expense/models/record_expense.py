@@ -10,39 +10,38 @@ class RecordExpense(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
 
-    name = fields.Char(string='Reference', default=lambda self: _('New'), required=True, copy=False, readonly=True,
-                       index=True, tracking=True)
-    state = fields.Selection(selection=[
-        ('draft', 'Draft'),
-        ('posted', 'Posted'),
-        ('cancel', 'Cancelled'),
-    ], default='draft', tracking=True)
-    company_id = fields.Many2one(comodel_name='res.company', default=lambda self: self.env.company, required=True)
-    journal_id = fields.Many2one(comodel_name='account.journal', string='Journal', required=True, tracking=True,
-                                 domain="[('company_id', '=', company_id)]")
     account_id = fields.Many2one(comodel_name='account.account', string='Credit Account', required=True, tracking=True)
-    currency_id = fields.Many2one(comodel_name='res.currency', related='company_id.currency_id', store=True,
-                                  readonly=True)
-    paid_to = fields.Char(tracking=True)
-    memo = fields.Text(tracking=True)
-    date = fields.Date(string='Accounting Date', default=fields.Date.context_today, tracking=True, required=True)
-    posting_date = fields.Date(default=fields.Date.context_today, readonly=True)
-    payment_date = fields.Date(string='Payment Date', required=True, tracking=True)
-    cheque_number = fields.Char(tracking=True)
-    record_expense_line_ids = fields.One2many(comodel_name='record.expense.line', inverse_name='record_expense_id',
-                                              string='Expense Lines', copy=True)
-    move_id = fields.Many2one(comodel_name='account.move', string='Journal Entry', copy=False, readonly=True)
-    cancelled_move_ids = fields.One2many(comodel_name='account.move', inverse_name='cancelled_expense_id',
-                                         string='Cancelled Journal Entries', readonly=True)
-    total_expense = fields.Monetary(compute='_compute_total_expense', store=True, tracking=True)
     amount_in_words = fields.Char(compute='_compute_amount_in_words')
-    payment_method = fields.Selection(selection=[
-        ('cheque', 'Cheque'),
-        ('online', 'Online'),
-        ('cash', 'Cash'),
-    ], string='Payment Method', default='cash', tracking=True, required=True)
     approved_by = fields.Many2one(comodel_name='res.users', string='Approved By', readonly=True, copy=False)
     cancelled_move_count = fields.Integer(compute='_compute_cancelled_move_count', string='Cancelled Move Count')
+    cancelled_move_ids = fields.One2many(comodel_name='account.move', inverse_name='cancelled_expense_id',
+                                         string='Cancelled Journal Entries', readonly=True)
+    cheque_number = fields.Char(tracking=True)
+    company_id = fields.Many2one(comodel_name='res.company', default=lambda self: self.env.company, required=True)
+    currency_id = fields.Many2one(comodel_name='res.currency', related='company_id.currency_id', store=True,
+                                  readonly=True)
+    date = fields.Date(string='Accounting Date', default=fields.Date.context_today, tracking=True, required=True)
+    journal_id = fields.Many2one(comodel_name='account.journal', string='Journal', required=True, tracking=True,
+                                 domain="[('company_id', '=', company_id)]")
+    memo = fields.Text(tracking=True)
+    move_id = fields.Many2one(comodel_name='account.move', string='Journal Entry', copy=False, readonly=True)
+    name = fields.Char(string='Reference', default=lambda self: _('New'), required=True, copy=False, readonly=True,
+                       index=True, tracking=True)
+    paid_to = fields.Char(tracking=True)
+    payment_date = fields.Date(string='Payment Date', required=True, tracking=True)
+    payment_method = fields.Selection(selection=[('cheque', 'Cheque'), ('online', 'Online'), ('cash', 'Cash')],
+                                      string='Payment Method', default='cash', tracking=True, required=True)
+    posting_date = fields.Date(default=fields.Date.context_today, readonly=True)
+    record_expense_line_ids = fields.One2many(comodel_name='record.expense.line', inverse_name='record_expense_id',
+                                              string='Expense Lines', copy=True)
+    state = fields.Selection(selection=[('draft', 'Draft'), ('posted', 'Posted'), ('cancel', 'Cancelled')],
+                             default='draft', tracking=True)
+    total_expense = fields.Monetary(compute='_compute_total_expense', store=True, tracking=True)
+
+    @api.depends('total_expense')
+    def _compute_amount_in_words(self):
+        for rec in self:
+            rec.amount_in_words = f"{num2words(rec.total_expense, lang='en').title()} Only" if rec.total_expense else False
 
     @api.depends('cancelled_move_ids')
     def _compute_cancelled_move_count(self):
@@ -54,17 +53,12 @@ class RecordExpense(models.Model):
         for rec in self:
             rec.total_expense = sum(rec.record_expense_line_ids.mapped('amount'))
 
-    @api.depends('total_expense')
-    def _compute_amount_in_words(self):
-        for rec in self:
-            rec.amount_in_words = f"{num2words(rec.total_expense, lang='en').title()} Only" if rec.total_expense else False
-
     @api.onchange('journal_id')
     def _onchange_journal_id(self):
         if self.journal_id and self.journal_id.default_account_id:
             self.account_id = self.journal_id.default_account_id
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('Exp_Seq') or _('New')
@@ -110,6 +104,50 @@ class RecordExpense(models.Model):
                     }
                     rec.move_id.with_context(skip_expense_sync=True).write(move_vals)
         return res
+
+    def action_draft(self):
+        for rec in self:
+            if rec.state not in ['posted', 'cancel']:
+                raise UserError(_("Only posted or cancelled expenses can be reset to draft."))
+
+            if rec.state == 'posted' and rec.move_id:
+                rec.move_id.with_context(skip_expense_sync=True).button_draft()
+
+            rec.write({
+                'state': 'draft',
+                'approved_by': False,
+            })
+
+    def action_open_cancelled_journal_entries(self):
+        self.ensure_one()
+        if self.cancelled_move_count == 1:
+            return {
+                'name': _('Cancelled Journal Entry'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'account.move',
+                'view_mode': 'form',
+                'res_id': self.cancelled_move_ids[0].id,
+                'target': 'current',
+            }
+        elif self.cancelled_move_count > 1:
+            return {
+                'name': _('Cancelled Journal Entries'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'account.move',
+                'view_mode': 'list,form',
+                'domain': [('id', 'in', self.cancelled_move_ids.ids)],
+                'target': 'current',
+            }
+
+    def action_open_journal_entry(self):
+        return {
+            'name': _('Journal Entry'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'view_mode': 'form',
+            'res_id': self.move_id.id,
+            'target': 'current',
+        }
 
     def action_post(self):
         for rec in self:
@@ -163,47 +201,3 @@ class RecordExpense(models.Model):
                 'move_id': move.id,
                 'approved_by': self.env.user.id,
             })
-
-    def action_draft(self):
-        for rec in self:
-            if rec.state not in ['posted', 'cancel']:
-                raise UserError(_("Only posted or cancelled expenses can be reset to draft."))
-
-            if rec.state == 'posted' and rec.move_id:
-                rec.move_id.with_context(skip_expense_sync=True).button_draft()
-
-            rec.write({
-                'state': 'draft',
-                'approved_by': False,
-            })
-
-    def action_open_cancelled_journal_entries(self):
-        self.ensure_one()
-        if self.cancelled_move_count == 1:
-            return {
-                'name': _('Cancelled Journal Entry'),
-                'type': 'ir.actions.act_window',
-                'res_model': 'account.move',
-                'view_mode': 'form',
-                'res_id': self.cancelled_move_ids[0].id,
-                'target': 'current',
-            }
-        elif self.cancelled_move_count > 1:
-            return {
-                'name': _('Cancelled Journal Entries'),
-                'type': 'ir.actions.act_window',
-                'res_model': 'account.move',
-                'view_mode': 'list,form',
-                'domain': [('id', 'in', self.cancelled_move_ids.ids)],
-                'target': 'current',
-            }
-
-    def action_open_journal_entry(self):
-        return {
-            'name': _('Journal Entry'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'account.move',
-            'view_mode': 'form',
-            'res_id': self.move_id.id,
-            'target': 'current',
-        }

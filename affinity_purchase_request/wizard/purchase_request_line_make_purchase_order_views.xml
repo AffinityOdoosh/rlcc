@@ -11,7 +11,7 @@
                     <sheet class="p-0">
                         <div class="o_form_statusbar px-4 py-3 bg-light border-bottom d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-2">
-                                <i class="fa fa-shopping-cart text-primary fs-3"/>
+                                <i class="fa fa-shopping-cart text-primary fs-3" title="Shopping Cart"/>
                                 <div>
                                     <h4 class="m-0 fw-bold text-dark">Create Request for Quotation</h4>
                                     <small class="text-muted">Consolidate request lines into a new or existing draft
@@ -26,7 +26,7 @@
                                     <div class="card h-100 border-0 bg-light shadow-sm">
                                         <div class="card-body p-3">
                                             <div class="d-flex align-items-center mb-2">
-                                                <i class="fa fa-file-text-o text-muted me-2"/>
+                                                <i class="fa fa-file-text-o text-muted me-2" title="Existing RFQ"/>
                                                 <h6 class="card-title m-0 fw-semibold text-uppercase text-muted fs-7">
                                                     Option A: Append to Existing RFQ
                                                 </h6>
@@ -44,7 +44,7 @@
                                     <div class="card h-100 border-0 bg-light shadow-sm">
                                         <div class="card-body p-3">
                                             <div class="d-flex align-items-center mb-2">
-                                                <i class="fa fa-user-plus text-muted me-2"/>
+                                                <i class="fa fa-user-plus text-muted me-2" title="New Vendor"/>
                                                 <h6 class="card-title m-0 fw-semibold text-uppercase text-muted fs-7">
                                                     Option B: Create New RFQ
                                                 </h6>
@@ -60,7 +60,7 @@
                             <div class="mb-2">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
                                     <h6 class="fw-bold text-dark m-0">
-                                        <i class="fa fa-list-ul me-1 text-primary"/>
+                                        <i class="fa fa-list-ul me-1 text-primary" title="Selected Items List"/>
                                         Selected Items to Include
                                     </h6>
                                 </div>

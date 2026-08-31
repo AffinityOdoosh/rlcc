@@ -3,7 +3,7 @@
 <odoo>
     <data>
         <template id="external_layout_standard_inherit_pager" inherit_id="web.external_layout_standard">
-            <xpath expr="//div[@class='o_footer_content d-flex border-top pt-2']" position="replace">
+            <xpath expr="//div[hasclass('o_footer_content')]" position="replace">
                 <div t-attf-class="o_footer_content d-flex {{ (pager if pager is not None else True) and 'border-top pt-2' or '' }}">
                     <div class="flex-grow-1 text-start me-2" t-field="company.report_footer"/>
                     <div class="text-end text-muted"
