@@ -41,7 +41,6 @@
                             </field>
                         </group>
                     </sheet>
-
                     <footer>
                         <button string="Export PDF"
                                 name="generate_pdf_report"

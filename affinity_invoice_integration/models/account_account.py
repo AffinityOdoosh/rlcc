@@ -7,7 +7,7 @@ CLIENT_ID = 'odoo_integration'
 CLIENT_SECRET = 'u2vvPrVGDcybaDXsQZqQOctKdV4CJOFPoBQI8taHXNE'
 
 
-class AccountAccount(models.Model):
+class AccountAccountInherit(models.Model):
     _inherit = 'account.account'
 
     api_account_code = fields.Char(string='API Code', index=True, copy=False,

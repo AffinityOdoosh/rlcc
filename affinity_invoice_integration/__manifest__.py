@@ -14,6 +14,7 @@
         'security/res_groups.xml',
         'security/ir.model.access.csv',
         'data/ir_cron.xml',
+        'data/ir_sequence.xml',
         'wizard/voucher_fetch_wizard_views.xml',
         'views/account_account_views.xml',
         'views/api_fetch_log_views.xml',

@@ -6,15 +6,13 @@
             <field name="name">api.fetch.log.list</field>
             <field name="model">api.fetch.log</field>
             <field name="arch" type="xml">
-                <list string="API Fetch Logs" create="false" edit="0" delete="0">
+                <list create="false" edit="0" delete="1">
+                    <field name="name"/>
                     <field name="execution_time"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
                     <field name="status" widget="badge" decoration-success="status == 'success'"
                            decoration-danger="status == 'failed'" decoration-warning="status == 'warning'"/>
-                    <field name="total_retrieved"/>
-                    <field name="total_created"/>
-                    <field name="total_skipped"/>
                 </list>
             </field>
         </record>
@@ -27,13 +25,14 @@
                     <sheet>
                         <div class="oe_title">
                             <h1>
-                                <field name="execution_time" readonly="1"/>
+                                <field name="name" readonly="1"/>
                             </h1>
                         </div>
                         <group>
                             <group string="Execution Context">
                                 <field name="status" widget="badge" decoration-success="status == 'success'"
                                        decoration-danger="status == 'failed'" decoration-warning="status == 'warning'"/>
+                                <field name="execution_time"/>
                                 <field name="date_from"/>
                                 <field name="date_to"/>
                             </group>
@@ -44,7 +43,7 @@
                             </group>
                         </group>
                         <notebook>
-                            <page string="Created Journal Entries" name="moves">
+                            <page string="Created Journal Entries" name="moves" invisible="not move_ids">
                                 <field name="move_ids" readonly="1">
                                     <list string="Fetched Journal Entries" create="0" delete="0">
                                         <field name="name" string="Number"/>
@@ -88,11 +87,54 @@
                                     </form>
                                 </field>
                             </page>
+                            <page string="Deletion History" name="deletion_log" invisible="not deletion_log">
+                                <div class="o_horizontal_separator text_uppercase fw-bolder text-muted mb-3">
+                                    Deletion Trace &amp; Audit Logs
+                                </div>
+                                <div class="alert alert-danger d-flex align-items-start mb-3" role="alert">
+                                    <i class="fa fa-exclamation-triangle fa-2x me-3 flex-shrink-0 text-danger mt-1"
+                                       title="Log Alert"/>
+                                    <div class="w-100">
+                                        <h5 class="alert-heading font-weight-bold mb-1">
+                                            Audit Record Found
+                                        </h5>
+                                        <p class="mb-0 text-muted small">
+                                            Review the recorded system trace and unmapped/deleted entity history details
+                                            below.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-view rounded border">
+                                    <field name="deletion_log" nolabel="1" readonly="1"
+                                           placeholder="No logs recorded..."
+                                           class="font-monospace text-wrap w-100 border-0 bg-transparent text-dark"
+                                           style="white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5;"/>
+                                </div>
+                            </page>
                             <page string="Errors &amp; Unmapped Accounts" name="errors"
                                   invisible="not error_message and not unmapped_accounts_log">
-                                <group>
-                                    <field name="error_message" invisible="not error_message"/>
-                                    <field name="unmapped_accounts_log" invisible="not unmapped_accounts_log"/>
+                                <div class="alert alert-danger mb-3" role="alert" invisible="not error_message"
+                                     style="border-left: 4px solid #dc3545;">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-exclamation-triangle fa-2x me-3 text-danger"/>
+                                        <div>
+                                            <h5 class="alert-heading mb-1 fw-bold">Execution Error Encountered</h5>
+                                            <field name="error_message" readonly="1" class="text-wrap mb-0"
+                                                   style="font-size: 0.95rem;"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <group string="Unmapped External Accounts" invisible="not unmapped_accounts_log"
+                                       class="mt-2">
+                                    <div class="p-3 bg-view rounded border" style="background-color: #f8f9fa;">
+                                        <p class="text-muted small mb-2">
+                                            <i class="fa fa-info-circle me-1"/>
+                                            The following external account codes received from the API need to be mapped
+                                            in Chart of Accounts:
+                                        </p>
+                                        <field name="unmapped_accounts_log" readonly="1" nolabel="1"
+                                               style="font-family: monospace; font-size: 0.88rem; white-space: pre-wrap; line-height: 1.6; color: #d63384; background-color: #f1f3f5; padding: 12px; border-radius: 6px; display: block;"/>
+                                    </div>
                                 </group>
                             </page>
                         </notebook>
@@ -102,13 +144,13 @@
         </record>
 
         <record id="action_api_fetch_log" model="ir.actions.act_window">
-            <field name="name">API Fetch Logs</field>
+            <field name="name">Sync Logs</field>
             <field name="res_model">api.fetch.log</field>
             <field name="view_mode">list,form</field>
         </record>
 
         <menuitem id="menu_api_fetch_log"
-                  name="API Sync Logs"
+                  name="Sync Logs"
                   action="action_api_fetch_log"
                   parent="menu_api_fetch_root"
                   groups="group_api_manager"
