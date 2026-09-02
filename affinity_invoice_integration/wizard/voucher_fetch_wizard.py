@@ -74,13 +74,6 @@ class VoucherFetchWizard(models.TransientModel):
 
         return entries
 
-    def _create_isolated_log(self, log_vals):
-        with self.env.registry.cursor() as new_cr:
-            new_env = api.Environment(new_cr, self.env.uid, self.env.context)
-            log = new_env['api.fetch.log'].create(log_vals)
-            new_cr.commit()
-            return log.id
-
     def _process_and_create_jv(self, target_date_from, target_date_to):
         log_name = f"API Log / {target_date_from.strftime('%Y-%m-%d')} - {target_date_to.strftime('%Y-%m-%d')}"
 
@@ -99,7 +92,7 @@ class VoucherFetchWizard(models.TransientModel):
             if not entries:
                 log_vals['status'] = 'success'
                 log_vals['error_message'] = 'No records fetched from API for the selected date range.'
-                self._create_isolated_log(log_vals)
+                self.env['api.fetch.log'].create(log_vals)
                 return self.env['account.move']
 
             existing_moves = self.env['account.move'].search([
@@ -130,7 +123,7 @@ class VoucherFetchWizard(models.TransientModel):
                 log_vals['status'] = 'success'
                 log_vals['total_created'] = 0
                 log_vals['error_message'] = 'All fetched entries already exist in system.'
-                self._create_isolated_log(log_vals)
+                self.env['api.fetch.log'].create(log_vals)
                 return self.env['account.move']
 
             active_codes = set()
@@ -145,7 +138,7 @@ class VoucherFetchWizard(models.TransientModel):
             if not active_codes:
                 log_vals['status'] = 'warning'
                 log_vals['error_message'] = 'Retrieved entries contained zero balance or valid debit/credit lines.'
-                self._create_isolated_log(log_vals)
+                self.env['api.fetch.log'].create(log_vals)
                 return self.env['account.move']
 
             accounts = self.env['account.account'].search([('api_account_code', 'in', list(active_codes))])
@@ -166,7 +159,10 @@ class VoucherFetchWizard(models.TransientModel):
                 log_vals['status'] = 'failed'
                 log_vals['unmapped_accounts_log'] = missing_msg
                 log_vals['error_message'] = 'Execution halted due to unmapped accounts.'
-                self._create_isolated_log(log_vals)
+
+                with self.env.cr.savepoint():
+                    self.env['api.fetch.log'].create(log_vals)
+
                 raise UserError(
                     _('Unmapped Accounts Detected.\n\nThe following external accounts are missing in Chart of Accounts:\n\n%s\n\nPlease map them before proceeding.') % missing_msg
                 )
@@ -176,11 +172,13 @@ class VoucherFetchWizard(models.TransientModel):
             if not glowsims_journal:
                 log_vals['status'] = 'failed'
                 log_vals['error_message'] = 'Journal with name \'GLOWSIMS\' not found.'
-                self._create_isolated_log(log_vals)
+
+                with self.env.cr.savepoint():
+                    self.env['api.fetch.log'].create(log_vals)
+
                 raise UserError(_('Configuration Error.\n\nNo journal found with the name \'GLOWSIMS\'.'))
 
-            log_id = self._create_isolated_log(log_vals)
-            log_record = self.env['api.fetch.log'].browse(log_id)
+            log_record = self.env['api.fetch.log'].create(log_vals)
             created_moves = self.env['account.move']
 
             for entry in new_entries:
@@ -252,7 +250,8 @@ class VoucherFetchWizard(models.TransientModel):
             if log_vals.get('status') != 'failed':
                 log_vals['status'] = 'failed'
                 log_vals['error_message'] = str(e)
-                self._create_isolated_log(log_vals)
+                with self.env.cr.savepoint():
+                    self.env['api.fetch.log'].create(log_vals)
             raise e
 
     def action_fetch_and_create_jv(self):

@@ -43,4 +43,5 @@ class AccountMove(models.Model):
                 updated_log = f"{existing_log}{new_entries_html}"
                 log.write({'deletion_log': updated_log})
 
-        return super(AccountMove, self).unlink()
+        res = super(AccountMove, self).unlink()
+        return res

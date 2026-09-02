@@ -104,11 +104,9 @@
                                         </p>
                                     </div>
                                 </div>
-                                <div class="p-3 bg-view rounded border">
-                                    <field name="deletion_log" nolabel="1" readonly="1"
-                                           placeholder="No logs recorded..."
-                                           class="font-monospace text-wrap w-100 border-0 bg-transparent text-dark"
-                                           style="white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5;"/>
+                                <div class="w-100">
+                                    <field name="deletion_log" widget="html" nolabel="1" readonly="1"
+                                           options="{'cssEdit': false}"/>
                                 </div>
                             </page>
                             <page string="Errors &amp; Unmapped Accounts" name="errors"
