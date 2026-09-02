@@ -43,11 +43,13 @@ class VoucherFetchWizard(models.TransientModel):
         page_size = 1000
         entries = []
 
+        session = requests.Session()
+        session.headers.update(headers)
+
         while True:
             try:
-                resp = requests.get(
+                resp = session.get(
                     f'{BASE_URL}/journal-entries',
-                    headers=headers,
                     params={
                         'date_from': target_date_from.strftime('%Y-%m-%d'),
                         'date_to': target_date_to.strftime('%Y-%m-%d'),
@@ -106,11 +108,13 @@ class VoucherFetchWizard(models.TransientModel):
                 self.env['api.fetch.log'].create(log_vals)
                 return self.env['account.move']
 
-            existing_moves = self.env['account.move'].search([
-                ('state', '!=', 'cancel'),
-                ('ref', '!=', False),
-            ])
-            existing_refs = {str(ref).strip() for ref in existing_moves.mapped('ref')}
+            existing_refs = set(
+                self.env['account.move'].search_read(
+                    [('state', '!=', 'cancel'), ('ref', '!=', False)],
+                    ['ref']
+                )
+            )
+            existing_ref_set = {str(r['ref']).strip() for r in existing_refs if r.get('ref')}
 
             new_entries = []
             skipped_count = 0
@@ -123,7 +127,7 @@ class VoucherFetchWizard(models.TransientModel):
                     ''
                 ).strip()
 
-                if ref and ref in existing_refs:
+                if ref and ref in existing_ref_set:
                     skipped_count += 1
                     continue
                 new_entries.append(entry)
@@ -164,7 +168,7 @@ class VoucherFetchWizard(models.TransientModel):
                 return self.env['account.move']
 
             accounts = self.env['account.account'].search([('api_account_code', 'in', list(active_codes))])
-            account_map = {acc.api_account_code: acc for acc in accounts}
+            account_map = {acc.api_account_code: acc.id for acc in accounts}
 
             missing_accounts = set()
             for entry in new_entries:
@@ -215,7 +219,7 @@ class VoucherFetchWizard(models.TransientModel):
                 raise UserError(_('Configuration Error.\n\nNo journal found with the name \'GLOWSIMS\'.'))
 
             log_record = self.env['api.fetch.log'].create(log_vals)
-            created_moves = self.env['account.move']
+            moves_to_create = []
 
             for entry in new_entries:
                 move_lines = []
@@ -246,14 +250,14 @@ class VoucherFetchWizard(models.TransientModel):
                     if debit == 0 and credit == 0:
                         continue
 
-                    account = account_map.get(code)
-                    if not account:
+                    account_id = account_map.get(code)
+                    if not account_id:
                         continue
 
                     line_name = line.get('description') or narration or False
 
                     move_lines.append((0, 0, {
-                        'account_id': account.id,
+                        'account_id': account_id,
                         'name': line_name,
                         'debit': debit,
                         'credit': credit,
@@ -269,10 +273,11 @@ class VoucherFetchWizard(models.TransientModel):
                         'api_fetch_log_id': log_record.id,
                         'line_ids': move_lines,
                     }
-                    move = self.env['account.move'].create(move_vals)
-                    created_moves |= move
-                    if entry_ref:
-                        existing_refs.add(entry_ref)
+                    moves_to_create.append(move_vals)
+
+            created_moves = self.env['account.move']
+            if moves_to_create:
+                created_moves = self.env['account.move'].create(moves_to_create)
 
             log_record.write({
                 'status': 'success',
