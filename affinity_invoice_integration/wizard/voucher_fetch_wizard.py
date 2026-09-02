@@ -74,6 +74,12 @@ class VoucherFetchWizard(models.TransientModel):
 
         return entries
 
+    def _create_failed_log(self, log_vals):
+        with self.pool.cursor() as new_cr:
+            new_env = api.Environment(new_cr, self.env.uid, self.env.context)
+            new_env['api.fetch.log'].create(log_vals)
+            new_cr.commit()
+
     def _process_and_create_jv(self, target_date_from, target_date_to):
         log_name = f"API Log / {target_date_from.strftime('%Y-%m-%d')} - {target_date_to.strftime('%Y-%m-%d')}"
 
@@ -90,8 +96,13 @@ class VoucherFetchWizard(models.TransientModel):
             log_vals['total_retrieved'] = len(entries)
 
             if not entries:
-                log_vals['status'] = 'success'
-                log_vals['error_message'] = 'No records fetched from API for the selected date range.'
+                log_vals['status'] = 'warning'
+                log_vals['error_message'] = '''
+                <div class="card border-info shadow-sm">
+                    <div class="card-body py-2 px-3 bg-light text-info fw-bold">
+                        <i class="fa fa-info-circle me-2"/>No records fetched from API for the selected date range.
+                    </div>
+                </div>'''
                 self.env['api.fetch.log'].create(log_vals)
                 return self.env['account.move']
 
@@ -120,10 +131,16 @@ class VoucherFetchWizard(models.TransientModel):
             log_vals['total_skipped'] = skipped_count
 
             if not new_entries:
-                log_vals['status'] = 'success'
+                log_vals['status'] = 'warning'
                 log_vals['total_created'] = 0
-                log_vals['error_message'] = 'All fetched entries already exist in system.'
-                self.env['api.fetch.log'].create(log_vals)
+                log_vals['error_message'] = '''
+                <div class="card border-info shadow-sm">
+                    <div class="card-body py-2 px-3 bg-light text-info fw-bold">
+                        <i class="fa fa-info-circle me-2"/>All fetched entries already exist in system.
+                    </div>
+                </div>'''
+                log_record = self.env['api.fetch.log'].create(log_vals)
+                log_record.write({'status': 'warning'})
                 return self.env['account.move']
 
             active_codes = set()
@@ -137,7 +154,12 @@ class VoucherFetchWizard(models.TransientModel):
 
             if not active_codes:
                 log_vals['status'] = 'warning'
-                log_vals['error_message'] = 'Retrieved entries contained zero balance or valid debit/credit lines.'
+                log_vals['error_message'] = '''
+                <div class="card border-warning shadow-sm">
+                    <div class="card-body py-2 px-3 bg-light text-warning fw-bold">
+                        <i class="fa fa-exclamation-triangle me-2"/>Retrieved entries contained zero balance or valid debit/credit lines.
+                    </div>
+                </div>'''
                 self.env['api.fetch.log'].create(log_vals)
                 return self.env['account.move']
 
@@ -155,26 +177,40 @@ class VoucherFetchWizard(models.TransientModel):
                         missing_accounts.add(f'• Code: {code} | Name: {account_name}')
 
             if missing_accounts:
-                missing_msg = '\n'.join(missing_accounts)
+                items_html = ''.join(
+                    [f'<div class="p-2 mb-1 bg-white border rounded text-danger fw-bold small">{acc}</div>' for acc in
+                     missing_accounts])
+                missing_msg = f'''
+                <div class="p-3 bg-light border rounded shadow-sm">{items_html}</div>
+                '''
                 log_vals['status'] = 'failed'
                 log_vals['unmapped_accounts_log'] = missing_msg
-                log_vals['error_message'] = 'Execution halted due to unmapped accounts.'
+                log_vals['error_message'] = '''
+                <div class="card border-danger shadow-sm">
+                    <div class="card-body py-2 px-3 bg-light text-danger fw-bold">
+                        <i class="fa fa-ban me-2"/>Execution halted due to unmapped accounts.
+                    </div>
+                </div>'''
 
-                with self.env.cr.savepoint():
-                    self.env['api.fetch.log'].create(log_vals)
+                self._create_failed_log(log_vals)
 
                 raise UserError(
-                    _('Unmapped Accounts Detected.\n\nThe following external accounts are missing in Chart of Accounts:\n\n%s\n\nPlease map them before proceeding.') % missing_msg
+                    _('Unmapped Accounts Detected.\n\nThe following external accounts are missing in Chart of Accounts:\n\n%s\n\nPlease map them before proceeding.') % '\n'.join(
+                        missing_accounts)
                 )
 
             glowsims_journal = self.env['account.journal'].search([('name', 'ilike', 'GLOWSIMS')], limit=1)
 
             if not glowsims_journal:
                 log_vals['status'] = 'failed'
-                log_vals['error_message'] = 'Journal with name \'GLOWSIMS\' not found.'
+                log_vals['error_message'] = '''
+                <div class="card border-danger shadow-sm">
+                    <div class="card-body py-2 px-3 bg-light text-danger fw-bold">
+                        <i class="fa fa-ban me-2"/>Journal with name 'GLOWSIMS' not found.
+                    </div>
+                </div>'''
 
-                with self.env.cr.savepoint():
-                    self.env['api.fetch.log'].create(log_vals)
+                self._create_failed_log(log_vals)
 
                 raise UserError(_('Configuration Error.\n\nNo journal found with the name \'GLOWSIMS\'.'))
 
@@ -249,10 +285,14 @@ class VoucherFetchWizard(models.TransientModel):
         except Exception as e:
             if log_vals.get('status') != 'failed':
                 log_vals['status'] = 'failed'
-                log_vals['error_message'] = str(e)
-                with self.env.cr.savepoint():
-                    self.env['api.fetch.log'].create(log_vals)
-            raise e
+                log_vals['error_message'] = f'''
+                <div class="card border-danger shadow-sm">
+                    <div class="card-body py-2 px-3 bg-light text-danger fw-bold">
+                        <i class="fa fa-ban me-2"/>{str(e)}
+                    </div>
+                </div>'''
+                self._create_failed_log(log_vals)
+            raise
 
     def action_fetch_and_create_jv(self):
         journal_entries = self._process_and_create_jv(self.date_from, self.date_to)

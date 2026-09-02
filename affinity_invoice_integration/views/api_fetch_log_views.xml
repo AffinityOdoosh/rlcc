@@ -111,29 +111,41 @@
                             </page>
                             <page string="Errors &amp; Unmapped Accounts" name="errors"
                                   invisible="not error_message and not unmapped_accounts_log">
-                                <div class="alert alert-danger mb-3" role="alert" invisible="not error_message"
-                                     style="border-left: 4px solid #dc3545;">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fa fa-exclamation-triangle fa-2x me-3 text-danger"/>
-                                        <div>
-                                            <h5 class="alert-heading mb-1 fw-bold">Execution Error Encountered</h5>
-                                            <field name="error_message" readonly="1" class="text-wrap mb-0"
-                                                   style="font-size: 0.95rem;"/>
+                                <div class="o_horizontal_separator text_uppercase fw-bolder text-muted mb-3">
+                                    System Exceptions &amp; Diagnostics
+                                </div>
+                                <div class="w-100 mb-4" invisible="not error_message">
+                                    <div class="alert alert-danger d-flex align-items-start mb-3" role="alert"
+                                         style="border-left: 4px solid #dc3545;">
+                                        <i class="fa fa-exclamation-triangle fa-2x me-3 flex-shrink-0 text-danger mt-1"
+                                           title="Error Alert"/>
+                                        <div class="w-100">
+                                            <h5 class="alert-heading font-weight-bold mb-1">
+                                                Execution Error Encountered
+                                            </h5>
+                                            <field name="error_message" widget="html" nolabel="1" readonly="1"
+                                                   options="{'cssEdit': false}"/>
                                         </div>
                                     </div>
                                 </div>
-                                <group string="Unmapped External Accounts" invisible="not unmapped_accounts_log"
-                                       class="mt-2">
-                                    <div class="p-3 bg-view rounded border" style="background-color: #f8f9fa;">
-                                        <p class="text-muted small mb-2">
-                                            <i class="fa fa-info-circle me-1"/>
-                                            The following external account codes received from the API need to be mapped
-                                            in Chart of Accounts:
-                                        </p>
-                                        <field name="unmapped_accounts_log" readonly="1" nolabel="1"
-                                               style="font-family: monospace; font-size: 0.88rem; white-space: pre-wrap; line-height: 1.6; color: #d63384; background-color: #f1f3f5; padding: 12px; border-radius: 6px; display: block;"/>
+                                <div class="w-100" invisible="not unmapped_accounts_log">
+                                    <div class="alert alert-warning d-flex align-items-start mb-3" role="alert"
+                                         style="border-left: 4px solid #ffc107;">
+                                        <i class="fa fa-exclamation-circle fa-2x me-3 flex-shrink-0 text-warning mt-1"
+                                           title="Mapping Alert"/>
+                                        <div class="w-100">
+                                            <h5 class="alert-heading font-weight-bold mb-1">
+                                                Unmapped External Accounts Found
+                                            </h5>
+                                            <p class="mb-2 text-muted small">
+                                                Review the missing accounts below and map them in your Chart of Accounts
+                                                to proceed.
+                                            </p>
+                                            <field name="unmapped_accounts_log" widget="html" nolabel="1" readonly="1"
+                                                   options="{'cssEdit': false}"/>
+                                        </div>
                                     </div>
-                                </group>
+                                </div>
                             </page>
                         </notebook>
                     </sheet>

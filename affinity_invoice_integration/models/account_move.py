@@ -6,7 +6,7 @@ class AccountMove(models.Model):
 
     is_api_fetched = fields.Boolean(string='Fetched from API', default=False, copy=False, readonly=True)
     api_fetch_log_id = fields.Many2one(comodel_name='api.fetch.log', string='API Fetch Log', readonly=True,
-                                       ondelete='set null', help='Link to the execution log generated during API sync.')
+                                       help='Link to the execution log generated during API sync.')
 
     def unlink(self):
         logs_to_update = {}

@@ -14,13 +14,13 @@ class ApiFetchLog(models.Model):
     status = fields.Selection(selection=[
         ('success', 'Success'),
         ('failed', 'Failed'),
-        ('warning', 'Partial / Warning'),
+        ('warning', 'Warning'),
     ], string='Status', required=True, default='success', readonly=True)
     total_retrieved = fields.Integer(string='Total Retrieved', default=0, readonly=True)
     total_skipped = fields.Integer(string='Total Skipped', default=0, readonly=True)
     total_created = fields.Integer(string='Total Created', default=0, readonly=True)
-    error_message = fields.Text(string='Error / Status Message', readonly=True)
-    unmapped_accounts_log = fields.Text(string='Unmapped Accounts Log', readonly=True)
+    error_message = fields.Html(string='Error / Status', readonly=True)
+    unmapped_accounts_log = fields.Html(string='Unmapped Accounts Log', readonly=True)
     deletion_log = fields.Html(string='Deletion Log History', readonly=True,
                                help='Tracks deleted Journal Entries associated with this execution log.')
     move_ids = fields.One2many(comodel_name='account.move', inverse_name='api_fetch_log_id',
