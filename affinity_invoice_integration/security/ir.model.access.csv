@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_voucher_fetch_wizard_manager,access.voucher.fetch.wizard.manager,model_voucher_fetch_wizard,group_api_manager,1,1,1,1
+access_api_fetch_log_manager,access.api.fetch.log.manager,model_api_fetch_log,group_api_manager,1,1,1,1

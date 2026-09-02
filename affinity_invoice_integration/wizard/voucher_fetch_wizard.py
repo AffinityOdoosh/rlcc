@@ -1,5 +1,4 @@
 import calendar
-from collections import defaultdict
 from datetime import date, timedelta
 
 import requests
@@ -75,116 +74,185 @@ class VoucherFetchWizard(models.TransientModel):
         return entries
 
     def _process_and_create_jv(self, target_date_from, target_date_to):
-        existing_move = self.env['account.move'].search([
-            ('state', '!=', 'cancel'),
-            ('voucher_date_from', '<=', target_date_to),
-            ('voucher_date_to', '>=', target_date_from),
-        ], limit=1)
-
-        if existing_move:
-            raise UserError(_(
-                'Date Range Overlap Detected.\n\n'
-                'A Journal Entry (%s) already exists for the overlapping period (%s to %s).\n'
-                'You cannot fetch entries for dates that have already been synced.'
-            ) % (
-                                existing_move.name or _('Draft'),
-                                existing_move.voucher_date_from,
-                                existing_move.voucher_date_to,
-                            ))
-
-        token = self._get_api_token()
-        entries = self._fetch_journal_entries(token, target_date_from, target_date_to)
-
-        if not entries:
-            return False
-
-        summary = defaultdict(lambda: {'debit': 0.0, 'credit': 0.0, 'descriptions': set(), 'name': ''})
-
-        for entry in entries:
-            for line in entry.get('lines', []):
-                code = str(line.get('account_code') or '').strip()
-                if not code:
-                    continue
-
-                debit = float(line.get('debit', 0.0))
-                credit = float(line.get('credit', 0.0))
-                account_name = line.get('account_name', '')
-                desc = line.get('description') or ''
-
-                summary[code]['debit'] += debit
-                summary[code]['credit'] += credit
-                summary[code]['name'] = account_name
-                if desc.strip():
-                    summary[code]['descriptions'].add(desc.strip())
-
-        active_codes = [
-            code for code, values in summary.items()
-            if round(values['debit'], 2) > 0 or round(values['credit'], 2) > 0
-        ]
-
-        if not active_codes:
-            return False
-
-        accounts = self.env['account.account'].search([('api_account_code', 'in', active_codes)])
-        account_map = {acc.api_account_code: acc for acc in accounts}
-
-        missing_accounts = [
-            f"• Code: {code} | Name: {summary[code]['name']}"
-            for code in active_codes if code not in account_map
-        ]
-
-        if missing_accounts:
-            missing_msg = '\n'.join(missing_accounts)
-            raise UserError(
-                _('Unmapped Accounts Detected.\n\nThe following external accounts are missing in the Chart of Accounts mapping:\n\n%s\n\nPlease set the "API Account Code" on the respective accounts before proceeding.') % missing_msg)
-
-        glowsims_journal = self.env['account.journal'].search([('name', 'ilike', 'GLOWSIMS')], limit=1)
-
-        if not glowsims_journal:
-            raise UserError(
-                _('Configuration Error.\n\nNo journal found with the name "GLOWSIMS". Please create or configure the required journal.'))
-
-        move_lines = []
-        for code in active_codes:
-            values = summary[code]
-            account = account_map[code]
-            net_debit = round(values['debit'], 2)
-            net_credit = round(values['credit'], 2)
-
-            line_name = ' / '.join(values['descriptions']) if values['descriptions'] else False
-
-            move_lines.append((0, 0, {
-                'account_id': account.id,
-                'name': line_name,
-                'debit': net_debit,
-                'credit': net_credit,
-            }))
-
-        move_vals = {
-            'journal_id': glowsims_journal.id,
-            'date': target_date_to,
-            'ref': f'Accumulated JV Sync ({target_date_from} to {target_date_to})',
-            'voucher_date_from': target_date_from,
-            'voucher_date_to': target_date_to,
-            'line_ids': move_lines,
+        log_vals = {
+            'date_from': target_date_from,
+            'date_to': target_date_to,
+            'execution_time': fields.Datetime.now(),
         }
 
-        return self.env['account.move'].create(move_vals)
+        try:
+            token = self._get_api_token()
+            entries = self._fetch_journal_entries(token, target_date_from, target_date_to)
+            log_vals['total_retrieved'] = len(entries)
+
+            if not entries:
+                log_vals['status'] = 'success'
+                log_vals['error_message'] = 'No records fetched from API for the selected date range.'
+                self.env['api.fetch.log'].create(log_vals)
+                return self.env['account.move']
+
+            existing_moves = self.env['account.move'].search([
+                ('state', '!=', 'cancel'),
+                ('ref', '!=', False),
+            ])
+            existing_refs = {str(ref).strip() for ref in existing_moves.mapped('ref')}
+
+            new_entries = []
+            skipped_count = 0
+
+            for entry in entries:
+                ref = str(
+                    entry.get('reference') or
+                    entry.get('voucher_no') or
+                    entry.get('name') or
+                    entry.get('id') or
+                    entry.get('voucher_id') or
+                    ''
+                ).strip()
+
+                if ref and ref in existing_refs:
+                    skipped_count += 1
+                    continue
+                new_entries.append(entry)
+
+            log_vals['total_skipped'] = skipped_count
+
+            if not new_entries:
+                log_vals['status'] = 'success'
+                log_vals['total_created'] = 0
+                log_vals['error_message'] = 'All fetched entries already exist in system.'
+                self.env['api.fetch.log'].create(log_vals)
+                return self.env['account.move']
+
+            active_codes = set()
+            for entry in new_entries:
+                for line in entry.get('lines', []):
+                    code = str(line.get('account_code') or '').strip()
+                    debit = float(line.get('debit', 0.0))
+                    credit = float(line.get('credit', 0.0))
+                    if code and (round(debit, 2) > 0 or round(credit, 2) > 0):
+                        active_codes.add(code)
+
+            if not active_codes:
+                log_vals['status'] = 'warning'
+                log_vals['error_message'] = 'Retrieved entries contained zero balance or valid debit/credit lines.'
+                self.env['api.fetch.log'].create(log_vals)
+                return self.env['account.move']
+
+            accounts = self.env['account.account'].search([('api_account_code', 'in', list(active_codes))])
+            account_map = {acc.api_account_code: acc for acc in accounts}
+
+            missing_accounts = set()
+            for entry in new_entries:
+                for line in entry.get('lines', []):
+                    code = str(line.get('account_code') or '').strip()
+                    debit = float(line.get('debit', 0.0))
+                    credit = float(line.get('credit', 0.0))
+                    if code and (round(debit, 2) > 0 or round(credit, 2) > 0) and code not in account_map:
+                        account_name = line.get('account_name', '')
+                        missing_accounts.add(f"• Code: {code} | Name: {account_name}")
+
+            if missing_accounts:
+                missing_msg = '\n'.join(missing_accounts)
+                log_vals['status'] = 'failed'
+                log_vals['unmapped_accounts_log'] = missing_msg
+                log_vals['error_message'] = 'Execution halted due to unmapped accounts.'
+                self.env['api.fetch.log'].create(log_vals)
+                raise UserError(
+                    _('Unmapped Accounts Detected.\n\nThe following external accounts are missing in Chart of Accounts:\n\n%s\n\nPlease map them before proceeding.') % missing_msg)
+
+            glowsims_journal = self.env['account.journal'].search([('name', 'ilike', 'GLOWSIMS')], limit=1)
+
+            if not glowsims_journal:
+                log_vals['status'] = 'failed'
+                log_vals['error_message'] = 'Journal with name "GLOWSIMS" not found.'
+                self.env['api.fetch.log'].create(log_vals)
+                raise UserError(_('Configuration Error.\n\nNo journal found with the name "GLOWSIMS".'))
+
+            created_moves = self.env['account.move']
+
+            for entry in new_entries:
+                move_lines = []
+
+                entry_ref = str(
+                    entry.get('reference') or
+                    entry.get('voucher_no') or
+                    entry.get('name') or
+                    entry.get('id') or
+                    entry.get('voucher_id') or
+                    ''
+                ).strip()
+
+                entry_date = entry.get('date') or entry.get('voucher_date') or entry.get('created_at') or target_date_to
+
+                for line in entry.get('lines', []):
+                    code = str(line.get('account_code') or '').strip()
+                    if not code:
+                        continue
+
+                    debit = round(float(line.get('debit', 0.0)), 2)
+                    credit = round(float(line.get('credit', 0.0)), 2)
+
+                    if debit == 0 and credit == 0:
+                        continue
+
+                    account = account_map.get(code)
+                    if not account:
+                        continue
+
+                    line_name = line.get('description') or False
+
+                    move_lines.append((0, 0, {
+                        'account_id': account.id,
+                        'name': line_name,
+                        'debit': debit,
+                        'credit': credit,
+                    }))
+
+                if move_lines:
+                    move_vals = {
+                        'journal_id': glowsims_journal.id,
+                        'date': entry_date,
+                        'ref': entry_ref if entry_ref else False,
+                        'line_ids': move_lines,
+                    }
+                    move = self.env['account.move'].create(move_vals)
+                    created_moves |= move
+                    if entry_ref:
+                        existing_refs.add(entry_ref)
+
+            log_vals['status'] = 'success'
+            log_vals['total_created'] = len(created_moves)
+            log_vals['move_ids'] = [(6, 0, created_moves.ids)]
+            self.env['api.fetch.log'].create(log_vals)
+
+            return created_moves
+
+        except Exception as e:
+            if log_vals.get('status') != 'failed':
+                log_vals['status'] = 'failed'
+                log_vals['error_message'] = str(e)
+                self.env['api.fetch.log'].create(log_vals)
+            raise e
 
     def action_fetch_and_create_jv(self):
-        journal_entry = self._process_and_create_jv(self.date_from, self.date_to)
-        if not journal_entry:
-            raise UserError(
-                _('No Data Found.\n\nNo active transactions or non-zero balances were retrieved for the selected date range (%s to %s).') % (
-                    self.date_from, self.date_to))
+        journal_entries = self._process_and_create_jv(self.date_from, self.date_to)
+
+        count = len(journal_entries)
+        if count == 0:
+            msg = _("Execution completed. No new Journal Entries created.")
+        else:
+            msg = _("Successfully fetched and created %s Journal Entries.") % count
 
         return {
-            'name': _('Journal Entry'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'account.move',
-            'res_id': journal_entry.id,
-            'view_mode': 'form',
-            'target': 'current',
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('API Fetch Processing'),
+                'message': msg,
+                'type': 'success' if count > 0 else 'warning',
+                'sticky': False,
+            }
         }
 
     @api.model

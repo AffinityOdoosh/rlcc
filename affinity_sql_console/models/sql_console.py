@@ -45,6 +45,36 @@ class SqlConsole(models.Model):
     allowed_group_ids = fields.Many2many(comodel_name='res.groups', relation='sql_console_res_groups_rel',
                                          column1='console_id', column2='group_id', string='Allowed Groups', copy=False,
                                          help='If set, users belonging to any of these groups can view and run this report.')
+    primary_model_id = fields.Many2one(comodel_name='ir.model', string='Primary Model',
+                                       compute='_compute_primary_model',
+                                       store=True, readonly=True, copy=False)
+    report_filter_field_ids = fields.Many2many(
+        comodel_name='ir.model.fields',
+        relation='sql_console_report_filter_fields_rel',
+        column1='console_id',
+        column2='field_id',
+        string='Report Filter Fields',
+        domain="[('model_id', '=', primary_model_id)]",
+        copy=False,
+        help='Fields that will be available as filters in the report export wizard.'
+    )
+
+    @api.depends('query_statement')
+    def _compute_primary_model(self):
+        IrModel = self.env['ir.model'].sudo()
+        for record in self:
+            record.primary_model_id = False
+            query = (record.query_statement or '').strip()
+            match = re.search(r'\bfrom\s+([a-zA-Z0-9_]+)', query, re.IGNORECASE)
+            if not match:
+                continue
+
+            table_name = match.group(1).lower()
+            model = IrModel.search([('model', '!=', False)], order='id')
+            for ir_model in model:
+                if ir_model.model in self.env and getattr(self.env[ir_model.model], '_table', '') == table_name:
+                    record.primary_model_id = ir_model.id
+                    break
 
     @api.constrains('allowed_user_ids', 'allowed_group_ids', 'is_report')
     def _check_and_sync_user_groups(self):
@@ -94,7 +124,7 @@ class SqlConsole(models.Model):
             },
         }
 
-    def _get_result_from_query(self, query):
+    def _get_result_from_query(self, query, params=None):
         self = self.sudo()
         headers = []
         datas = []
@@ -113,7 +143,7 @@ class SqlConsole(models.Model):
             if not is_admin:
                 self.env.cr.execute("SET TRANSACTION READ ONLY;")
 
-            self.env.cr.execute(query)
+            self.env.cr.execute(query, params or [])
             affected_rows = self.env.cr.rowcount
 
             if self.env.cr.description:
@@ -151,12 +181,17 @@ class SqlConsole(models.Model):
         return header.replace('_', ' ').title()
 
     def _detect_primary_model(self, query):
-        match = re.search(r'\bfrom\s+([a-zA-Z0-9_]+)', query, re.IGNORECASE)
-        if match:
-            table_name = match.group(1).lower()
-            for model_name, model_obj in self.env.items():
-                if getattr(model_obj, '_table', None) == table_name:
-                    return model_name
+        match = re.search(r'\bfrom\s+([a-zA-Z0-9_]+)', query or '', re.IGNORECASE)
+        if not match:
+            return None
+
+        table_name = match.group(1).lower()
+
+        for model_name in self.env:
+            model = self.env[model_name]
+            if getattr(model, '_table', None) == table_name:
+                return model_name
+
         return None
 
     def _get_field_types_map(self, headers, query_statement):
@@ -295,6 +330,7 @@ class SqlConsole(models.Model):
                 'row_count': False,
                 'raw_row_count': 0,
                 'state': 'draft',
+                'report_filter_field_ids': [(5, 0, 0)],
             })
         return super(SqlConsole, self).write(vals)
 

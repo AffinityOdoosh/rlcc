@@ -98,6 +98,13 @@
                                         <field name="allowed_group_ids" widget="many2many_tags"
                                                options="{'no_create': True}"/>
                                     </group>
+                                    <group string="Report Filters" invisible="not is_report">
+                                        <field name="primary_model_id" readonly="1"/>
+                                        <field name="report_filter_field_ids"
+                                               widget="many2many_tags"
+                                               options="{'no_create': True}"
+                                               domain="[('model_id', '=', primary_model_id)]"/>
+                                    </group>
                                 </group>
                             </page>
                         </notebook>

@@ -15,11 +15,45 @@
                                 <field name="pdf_orientation" widget="radio" options="{'horizontal': true}"/>
                             </group>
                         </group>
+
+                        <group string="Report Filters" invisible="not filter_ids">
+                            <field name="filter_ids" nolabel="1">
+                                <list editable="bottom" create="false" delete="false">
+                                    <field name="field_id" readonly="1"/>
+                                    <field name="field_type" invisible="1"/>
+                                    <field name="value"
+                                           invisible="field_type in ['date', 'datetime', 'integer', 'float', 'monetary', 'boolean']"/>
+                                    <field name="date_from"
+                                           invisible="field_type != 'date'"/>
+                                    <field name="date_to"
+                                           invisible="field_type != 'date'"/>
+                                    <field name="datetime_from"
+                                           invisible="field_type != 'datetime'"/>
+                                    <field name="datetime_to"
+                                           invisible="field_type != 'datetime'"/>
+                                    <field name="number_from"
+                                           invisible="field_type not in ['integer', 'float', 'monetary']"/>
+                                    <field name="number_to"
+                                           invisible="field_type not in ['integer', 'float', 'monetary']"/>
+                                    <field name="boolean_value"
+                                           invisible="field_type != 'boolean'"/>
+                                </list>
+                            </field>
+                        </group>
                     </sheet>
+
                     <footer>
-                        <button string="Export PDF" name="generate_pdf_report" type="object" class="btn-primary"/>
-                        <button string="Export XLSX" name="generate_excel_report" type="object" class="btn-primary"/>
-                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                        <button string="Export PDF"
+                                name="generate_pdf_report"
+                                type="object"
+                                class="btn-primary"/>
+                        <button string="Export XLSX"
+                                name="generate_excel_report"
+                                type="object"
+                                class="btn-primary"/>
+                        <button string="Cancel"
+                                class="btn-secondary"
+                                special="cancel"/>
                     </footer>
                 </form>
             </field>
