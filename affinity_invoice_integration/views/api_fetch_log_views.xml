@@ -6,7 +6,7 @@
             <field name="name">api.fetch.log.list</field>
             <field name="model">api.fetch.log</field>
             <field name="arch" type="xml">
-                <list create="false" edit="0" delete="1">
+                <list create="0" edit="0" delete="0">
                     <field name="name"/>
                     <field name="execution_time"/>
                     <field name="date_from"/>
