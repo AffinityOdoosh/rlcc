@@ -108,11 +108,9 @@ class VoucherFetchWizard(models.TransientModel):
                 self.env['api.fetch.log'].create(log_vals)
                 return self.env['account.move']
 
-            existing_refs = set(
-                self.env['account.move'].search_read(
-                    [('state', '!=', 'cancel'), ('ref', '!=', False)],
-                    ['ref']
-                )
+            existing_refs = self.env['account.move'].search_read(
+                [('state', '!=', 'cancel'), ('ref', '!=', False)],
+                ['ref']
             )
             existing_ref_set = {str(r['ref']).strip() for r in existing_refs if r.get('ref')}
 
