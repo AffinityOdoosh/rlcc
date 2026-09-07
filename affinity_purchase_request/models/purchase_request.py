@@ -100,26 +100,29 @@ class PurchaseRequest(models.Model):
         AccountTax = self.env['account.tax']
         for req in self:
             company = req.company_id or self.env.company
+            currency = req.currency_id or company.currency_id
+
             base_lines = []
             for line in req.line_ids:
                 taxes = getattr(line, 'tax_id', False) or getattr(line, 'taxes_id', False) or self.env['account.tax']
-                base_lines.append(AccountTax._prepare_base_line_for_taxes_computation(
-                    line,
-                    price_unit=line.estimated_cost / line.product_qty if line.product_qty else line.estimated_cost,
-                    quantity=line.product_qty or 1.0,
-                    taxes=taxes,
-                    currency=req.currency_id or company.currency_id,
-                ))
-            if base_lines:
-                AccountTax._add_tax_details_in_base_lines(base_lines, company)
-                AccountTax._round_base_lines_tax_details(base_lines, company)
-                req.tax_totals = AccountTax._get_tax_totals_summary(
-                    base_lines=base_lines,
-                    currency=req.currency_id or company.currency_id,
-                    company=company,
+                base_lines.append(
+                    AccountTax._prepare_base_line_for_taxes_computation(
+                        line,
+                        price_unit=line.estimated_cost / line.product_qty if line.product_qty else line.estimated_cost,
+                        quantity=line.product_qty or 1.0,
+                        taxes=taxes,
+                        currency=currency,
+                    )
                 )
-            else:
-                req.tax_totals = False
+
+            AccountTax._add_tax_details_in_base_lines(base_lines, company)
+            AccountTax._round_base_lines_tax_details(base_lines, company)
+
+            req.tax_totals = AccountTax._get_tax_totals_summary(
+                base_lines=base_lines,
+                currency=currency,
+                company=company,
+            )
 
     @api.depends('line_ids')
     def _compute_purchase_count(self):
