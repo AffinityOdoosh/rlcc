@@ -11,6 +11,7 @@
     'version': '18.0',
     'depends': ['affinity_purchase_request', 'sale'],
     'data': [
+        'views/product_template_views.xml',
         'views/res_partner_views.xml',
     ],
     'assets': {},
