@@ -28,7 +28,7 @@
                                 Date Received On
                             </div>
                             <div style="font-size:15px; font-weight:600; color:#1F2937; margin-top:4px;">
-                                <span t-field="o.date_start"/>
+                                <span t-field="o.date"/>
                             </div>
                         </div>
                         <div class="col-4 text-end">
