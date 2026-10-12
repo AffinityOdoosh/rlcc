@@ -36,7 +36,6 @@
                                 Department
                             </div>
                             <div style="font-size:15px; font-weight:600; color:#1F2937; margin-top:4px;">
-                                <span t-field="o.department_id.name"/>
                             </div>
                         </div>
                     </div>
