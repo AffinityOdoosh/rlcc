@@ -146,7 +146,7 @@
             </div>
         </template>
 
-        <template id="report_purchase_request_template">
+        <template id="report_purchase_request_temp">
             <t t-call="web.html_container">
                 <t t-foreach="docs" t-as="o">
                     <t t-set="pager" t-value="False"/>

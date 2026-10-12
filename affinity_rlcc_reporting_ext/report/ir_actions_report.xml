@@ -14,8 +14,8 @@
             <field name="name">Purchase Request</field>
             <field name="model">purchase.request</field>
             <field name="report_type">qweb-pdf</field>
-            <field name="report_name">affinity_rlcc_reporting_ext.report_purchase_request_template</field>
-            <field name="report_file">affinity_rlcc_reporting_ext.report_purchase_request_template</field>
+            <field name="report_name">affinity_rlcc_reporting_ext.report_purchase_request_temp</field>
+            <field name="report_file">affinity_rlcc_reporting_ext.report_purchase_request_temp</field>
         </record>
 
         <record id="action_report_grn" model="ir.actions.report">
