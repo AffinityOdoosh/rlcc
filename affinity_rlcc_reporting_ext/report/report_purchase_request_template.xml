@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
-        <template id="report_purchase_request_main_template">
+        <template id="report_purchase_request_rlcc_template">
             <t t-set="primary_color" t-value="'#5E1756'"/>
             <div class="page" style="font-size: 14px;">
                 <!-- Header Title -->
@@ -99,7 +99,6 @@
                     *Include labor in Item section
                 </div>
 
-                <!-- Approval Signatures Section (Journal Voucher Style) -->
                 <div class="row mt-4 pt-4" style="font-size:13px;">
                     <div class="col-4 text-center mb-4">
                         <div style="height:35px;"/>
@@ -152,7 +151,7 @@
                 <t t-foreach="docs" t-as="o">
                     <t t-set="pager" t-value="False"/>
                     <t t-call="web.external_layout">
-                        <t t-call="affinity_rlcc_reporting_ext.report_purchase_request_main_template"/>
+                        <t t-call="affinity_rlcc_reporting_ext.report_purchase_request_rlcc_template"/>
                     </t>
                 </t>
             </t>
