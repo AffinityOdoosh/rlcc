@@ -4,29 +4,28 @@
     <data>
         <template id="report_purchase_request_main_template">
             <t t-set="primary_color" t-value="'#5E1756'"/>
-            <t t-set="has_taxes" t-value="any(line.product_uom_id for line in o.line_ids)"/>
-            <div class="page" style="font-size: 14px; position: relative;">
+            <div class="page" style="font-size:14px;position:relative;">
                 <t t-if="o.state == 'cancel'">
-                    <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none;"
+                    <svg style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:9999;pointer-events:none;"
                          viewBox="0 0 1000 800">
                         <text x="500" y="400" text-anchor="middle" dominant-baseline="middle"
                               transform="rotate(-45, 500, 400)"
-                              style="font-size:150px; font-weight:900; fill:#DC3545; fill-opacity:0.2; letter-spacing:10px; text-transform:uppercase;">
+                              style="font-size:150px;font-weight:900;fill:#DC3545;fill-opacity:0.2;letter-spacing:10px;text-transform:uppercase;">
                             CANCELLED
                         </text>
                     </svg>
                 </t>
-                <div t-attf-style="border-bottom:3px solid {{primary_color}}; padding-bottom:10px; margin-bottom:30px;">
+                <div t-attf-style="border-bottom:3px solid {{primary_color}};padding-bottom:10px;margin-bottom:30px;">
                     <h2 class="text-center fw-bold text-uppercase mb-0"
-                        t-attf-style="color:{{primary_color}}; letter-spacing:2px;">
-                        <span>Purchase Request</span>
+                        t-attf-style="color:{{primary_color}};letter-spacing:2px;">
+                        Purchase Request
                     </h2>
                 </div>
                 <div style="background:#F5F7FA;border:1px solid #D9E2EC;border-radius:8px;padding:18px 22px;margin-bottom:30px;">
                     <div class="row align-items-center">
                         <div class="col-4">
                             <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
-                                Request No.
+                                Requisition #
                             </div>
                             <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
                                 <span t-field="o.name"/>
@@ -34,96 +33,207 @@
                         </div>
                         <div class="col-4 text-center">
                             <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
-                                Requested By
-                            </div>
-                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
-                                <span t-field="o.requested_by.name"/>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
-                                Request Date
+                                Date Received On
                             </div>
                             <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
                                 <span t-field="o.date"/>
                             </div>
                         </div>
+                        <div class="col-4 text-end">
+                            <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
+                                Department
+                            </div>
+                            <div style="font-size:15px;font-weight:600;color:#1F2937;margin-top:4px;">
+                                <span t-if="o.department_id" t-field="o.department_id.name"/>
+                                <span t-else="">&#160;</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <table class="table mb-0"
-                       style="font-size:14px; border:1px solid #d7dee8; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:8px 8px 0 0;">
+                       style="font-size:14px;border:1px solid #d7dee8;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:8px 8px 0 0;">
                     <thead t-attf-style="background:{{primary_color}};">
                         <tr>
                             <th class="text-center py-3 ps-3 text-uppercase"
-                                style="border:none; border-right:1px solid rgba(255,255,255,0.15); font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
-                                Description
+                                style="width:50px;border:none;border-right:1px solid rgba(255,255,255,0.15);font-weight:600;letter-spacing:.5px;color:#FFFFFF;text-align:center;">
+                                S/N
+                            </th>
+                            <th class="text-center py-3 ps-3 text-uppercase"
+                                style="border:none;border-right:1px solid rgba(255,255,255,0.15);font-weight:600;letter-spacing:.5px;color:#FFFFFF;text-align:center;">
+                                Item
                             </th>
                             <th class="text-center py-3 text-uppercase"
-                                style="border:none; border-right:1px solid rgba(255,255,255,0.15); font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
-                                Qty
+                                style="border:none;border-right:1px solid rgba(255,255,255,0.15);font-weight:600;letter-spacing:.5px;color:#FFFFFF;text-align:center;">
+                                UOM
                             </th>
                             <th class="text-center py-3 text-uppercase"
-                                style="border:none; border-right:1px solid rgba(255,255,255,0.15); font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
-                                UoM
+                                style="border:none;border-right:1px solid rgba(255,255,255,0.15);font-weight:600;letter-spacing:.5px;color:#FFFFFF;text-align:center;">
+                                QTY.
+                            </th>
+                            <th class="text-center py-3 text-uppercase"
+                                style="border:none;border-right:1px solid rgba(255,255,255,0.15);font-weight:600;letter-spacing:.5px;color:#FFFFFF;text-align:center;">
+                                Remarks / Purpose
                             </th>
                             <th class="text-center py-3 pe-3 text-uppercase"
-                                style="border:none; border-right:1px solid #d7dee8; font-weight:600; letter-spacing:.5px; color:#FFFFFF;">
-                                Required Date
+                                style="border:none;border-right:1px solid #d7dee8;font-weight:600;letter-spacing:.5px;color:#FFFFFF;text-align:center;">
+                                Vendor Name / Number / Status
                             </th>
                         </tr>
                     </thead>
                     <tbody>
+                        <t t-set="serial_no" t-value="1"/>
                         <tr t-foreach="o.line_ids" t-as="line"
-                            style="border-bottom:1px solid #d7dee8; background:#ffffff;">
-                            <td class="py-3 ps-3" style="border-right:1px solid #d7dee8;">
-                                <span t-field="line.name"/>
+                            style="border-bottom:1px solid #d7dee8;background:#ffffff;">
+                            <td class="py-3 ps-3 text-center" style="border-right:1px solid #d7dee8;color:#495057;">
+                                <span t-esc="serial_no"/>
+                                <t t-set="serial_no" t-value="serial_no + 1"/>
                             </td>
-                            <td class="py-3 text-center" style="color:#495057; border-right:1px solid #d7dee8;">
+                            <td class="py-3 ps-3" style="border-right:1px solid #d7dee8;">
+                                <div class="fw-bold" t-attf-style="color:{{primary_color}};"
+                                     t-field="line.product_id.name"/>
+                                <div class="mt-1" style="color:#6c7a89;" t-field="line.name"/>
+                            </td>
+                            <td class="py-3 text-center" style="color:#495057;border-right:1px solid #d7dee8;">
+                                <span t-field="line.product_uom_id" groups="uom.group_uom"/>
+                            </td>
+                            <td class="py-3 text-center" style="color:#495057;border-right:1px solid #d7dee8;">
                                 <span t-field="line.product_qty"/>
                             </td>
-                            <td class="py-3 text-center" style="color:#495057; border-right:1px solid #d7dee8;">
-                                <span t-field="line.product_uom_id"/>
-                            </td>
-                            <td class="py-3 pe-3 text-center" style="color:#1f2937; border-right:1px solid #d7dee8;">
-                                <span t-field="line.date_required"/>
-                            </td>
+                            <td class="py-3 ps-3" style="color:#495057;border-right:1px solid #d7dee8;"/>
+                            <td class="py-3 pe-3" style="color:#495057;border-right:1px solid #d7dee8;"/>
                         </tr>
                     </tbody>
                 </table>
-                <div style="height: 30px;"></div>
                 <t t-if="o.description and not is_html_empty(o.description)">
-                    <div t-attf-style="background:#EEF3F8; border-left:5px solid {{primary_color}}; border-radius:8px; padding:18px; margin-bottom:18px;">
-                        <div style="font-size:11px; color:#6B7280; text-transform:uppercase; font-weight:600;">
+                    <div style="height:25px;"/>
+                    <div t-attf-style="background:#EEF3F8;border-left:5px solid {{primary_color}};border-radius:8px;padding:18px;margin-bottom:18px;">
+                        <div style="font-size:11px;color:#6B7280;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">
                             Description / Remarks
                         </div>
-                        <div style="font-size:15px; color:#1F2937; font-weight:600;">
+                        <div style="font-size:15px;color:#1F2937;font-weight:600;margin-top:5px;">
                             <span t-field="o.description"/>
                         </div>
                     </div>
                 </t>
-                <div class="row mt-5 pt-5" style="font-size:14px;">
-                    <div class="col-4 text-center">
-                        <div style="height:40px;padding-top:16px;box-sizing:border-box;">
-                            <span t-if="o.requested_by" t-field="o.requested_by.name"
-                                  style="display:inline-block;color:#1F2937;font-size:14px;font-weight:600;line-height:14px;"/>
+                <div style="margin-top:20px;margin-bottom:8px;padding-bottom:7px;border-bottom:2px solid #E5E7EB;">
+                    <h4 t-attf-style="margin:0;color:{{primary_color}};font-size:15px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;">
+                        Approval &amp; Signatures
+                    </h4>
+                    <div style="font-size:10px;color:#6B7280;margin-top:3px;">
+                        Review, authorization and receipt confirmation
+                    </div>
+                </div>
+                <div style="margin-top:8px;color:#1F2937;font-size:12px;">
+                    <div style="padding:6px 0 7px;border-bottom:1px solid #E5E7EB;">
+                        <div style="display:inline-block;width:25%;vertical-align:bottom;font-weight:700;">
+                            <div style="font-size:9px;color:#8B8490;letter-spacing:.7px;text-transform:uppercase;">Step
+                                01 · 3 Days
+                            </div>
+                            <div style="margin-top:3px;">Prepared by Admin</div>
                         </div>
-                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
-                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
-                            Requested By
+                        <div style="display:inline-block;width:48%;vertical-align:bottom;text-align:center;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Signature</div>
+                        </div>
+                        <div style="display:inline-block;width:22%;vertical-align:bottom;text-align:center;padding-left:8px;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Date</div>
                         </div>
                     </div>
-                    <div class="col-4 text-center">
-                        <div style="height:40px;"/>
-                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
-                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
-                            Department Manager
+                    <div style="padding:6px 0 7px;border-bottom:1px solid #E5E7EB;">
+                        <div style="display:inline-block;width:25%;vertical-align:bottom;font-weight:700;">
+                            <div style="font-size:9px;color:#8B8490;letter-spacing:.7px;text-transform:uppercase;">Step
+                                02 · 1 Day
+                            </div>
+                            <div style="margin-top:3px;">Approved by HOD</div>
+                        </div>
+                        <div style="display:inline-block;width:48%;vertical-align:bottom;text-align:center;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Signature</div>
+                        </div>
+                        <div style="display:inline-block;width:22%;vertical-align:bottom;text-align:center;padding-left:8px;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Date</div>
                         </div>
                     </div>
-                    <div class="col-4 text-center">
-                        <div style="height:40px;"/>
-                        <div t-attf-style="width:180px;height:2px;background:{{primary_color}};margin:0 auto;"/>
-                        <div t-attf-style="margin-top:10px;color:{{primary_color}};font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.8px;">
-                            Authorized By
+                    <div style="padding:6px 0 7px;border-bottom:1px solid #E5E7EB;">
+                        <div style="display:inline-block;width:25%;vertical-align:bottom;font-weight:700;">
+                            <div style="font-size:9px;color:#8B8490;letter-spacing:.7px;text-transform:uppercase;">Step
+                                03 · 2 Days
+                            </div>
+                            <div style="margin-top:3px;">Verified by Accounts</div>
+                        </div>
+                        <div style="display:inline-block;width:48%;vertical-align:bottom;text-align:center;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Signature</div>
+                        </div>
+                        <div style="display:inline-block;width:22%;vertical-align:bottom;text-align:center;padding-left:8px;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Date</div>
+                        </div>
+                    </div>
+                    <div style="padding:6px 0 7px;border-bottom:1px solid #E5E7EB;">
+                        <div style="display:inline-block;width:25%;vertical-align:bottom;font-weight:700;">
+                            <div style="font-size:9px;color:#8B8490;letter-spacing:.7px;text-transform:uppercase;">Step
+                                04 · 2 Days
+                            </div>
+                            <div style="margin-top:3px;">Approved by Management</div>
+                        </div>
+                        <div style="display:inline-block;width:48%;vertical-align:bottom;text-align:center;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Signature</div>
+                        </div>
+                        <div style="display:inline-block;width:22%;vertical-align:bottom;text-align:center;padding-left:8px;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Date</div>
+                        </div>
+                    </div>
+                    <div style="padding:6px 0 7px;border-bottom:1px solid #E5E7EB;">
+                        <div style="display:inline-block;width:25%;vertical-align:bottom;font-weight:700;">
+                            <div style="font-size:9px;color:#8B8490;letter-spacing:.7px;text-transform:uppercase;">Step
+                                05 · 2 Days
+                            </div>
+                            <div style="margin-top:3px;">Cash Received by Admin</div>
+                        </div>
+                        <div style="display:inline-block;width:48%;vertical-align:bottom;text-align:center;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Signature</div>
+                        </div>
+                        <div style="display:inline-block;width:22%;vertical-align:bottom;text-align:center;padding-left:8px;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Date</div>
+                        </div>
+                    </div>
+                    <div style="padding:6px 0 7px;border-bottom:1px solid #E5E7EB;">
+                        <div style="display:inline-block;width:25%;vertical-align:bottom;font-weight:700;">
+                            <div style="font-size:9px;color:#8B8490;letter-spacing:.7px;text-transform:uppercase;">Step
+                                06 · 2 Days
+                            </div>
+                            <div style="margin-top:3px;">Purchased by</div>
+                        </div>
+                        <div style="display:inline-block;width:48%;vertical-align:bottom;text-align:center;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Signature</div>
+                        </div>
+                        <div style="display:inline-block;width:22%;vertical-align:bottom;text-align:center;padding-left:8px;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Date</div>
+                        </div>
+                    </div>
+                    <div style="padding:6px 0 7px;">
+                        <div style="display:inline-block;width:25%;vertical-align:bottom;font-weight:700;">
+                            <div style="font-size:9px;color:#8B8490;letter-spacing:.7px;text-transform:uppercase;">Step
+                                07 · 1 Day
+                            </div>
+                            <div style="margin-top:3px;">Received by HOD</div>
+                        </div>
+                        <div style="display:inline-block;width:48%;vertical-align:bottom;text-align:center;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Signature</div>
+                        </div>
+                        <div style="display:inline-block;width:22%;vertical-align:bottom;text-align:center;padding-left:8px;">
+                            <div style="height:20px;border-bottom:1px solid #9CA3AF;"/>
+                            <div style="font-size:10px;color:#6B7280;text-align:center;margin-top:3px;">Date</div>
                         </div>
                     </div>
                 </div>

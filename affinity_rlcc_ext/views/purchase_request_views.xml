@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <data>
+        <record id="view_purchase_request_form_inherit_department" model="ir.ui.view">
+            <field name="name">purchase.request.form.inherit.department</field>
+            <field name="model">purchase.request</field>
+            <field name="inherit_id" ref="affinity_purchase_request.view_purchase_request_form"/>
+            <field name="arch" type="xml">
+                <field name="requested_by" position="after">
+                    <field name="department_id" options="{'no_create': True}" readonly="not is_editable"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_purchase_request_tree_inherit_department" model="ir.ui.view">
+            <field name="name">purchase.request.list.inherit.department</field>
+            <field name="model">purchase.request</field>
+            <field name="inherit_id" ref="affinity_purchase_request.view_purchase_request_tree"/>
+            <field name="arch" type="xml">
+                <field name="requested_by" position="after">
+                    <field name="department_id" optional="hide"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_purchase_request_search_inherit_department" model="ir.ui.view">
+            <field name="name">purchase.request.list.select.inherit.department</field>
+            <field name="model">purchase.request</field>
+            <field name="inherit_id" ref="affinity_purchase_request.view_purchase_request_search"/>
+            <field name="arch" type="xml">
+                <field name="requested_by" position="after">
+                    <field name="department_id"/>
+                </field>
+                <filter name="requested_by" position="after">
+                    <filter name="department_id" string="Department" icon="fa-users"
+                            context="{'group_by': 'department_id'}"/>
+                </filter>
+            </field>
+        </record>
+    </data>
+</odoo>

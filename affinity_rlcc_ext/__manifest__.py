@@ -12,6 +12,7 @@
     'depends': ['affinity_purchase_request', 'sale'],
     'data': [
         'views/product_template_views.xml',
+        'views/purchase_request_views.xml',
         'views/res_partner_views.xml',
     ],
     'assets': {},

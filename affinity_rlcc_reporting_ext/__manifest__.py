@@ -9,7 +9,7 @@
     'summary': 'Affinity RLCC Reporting Extension Module',
     'description': '''Affinity RLCC Reporting Extension Module''',
     'version': '18.0',
-    'depends': ['affinity_report_xlsx', 'affinity_rlcc_ext', 'affinity_purchase_request'],
+    'depends': ['affinity_report_xlsx', 'affinity_rlcc_ext'],
     'data': [
         'report/external_layout_standard_template.xml',
         'report/report_grn_template.xml',
@@ -18,7 +18,6 @@
         'report/report_petty_cash_payment_template.xml',
         'report/report_petty_cash_receipt_template.xml',
         'report/report_purchase_order_template.xml',
-        'report/report_purchase_request_template.xml',
         'report/report_receipt_voucher_template.xml',
         'report/ir_actions_report.xml',
     ],
