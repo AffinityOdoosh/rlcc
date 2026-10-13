@@ -64,11 +64,11 @@
                             </th>
                             <th class="text-center py-3 text-uppercase"
                                 style="border:none;border-right:1px solid rgba(255,255,255,0.15);font-weight:600;letter-spacing:.5px;color:#FFFFFF;text-align:center;">
-                                UOM
+                                QTY.
                             </th>
                             <th class="text-center py-3 text-uppercase"
                                 style="border:none;border-right:1px solid rgba(255,255,255,0.15);font-weight:600;letter-spacing:.5px;color:#FFFFFF;text-align:center;">
-                                QTY.
+                                UOM
                             </th>
                             <th class="text-center py-3 text-uppercase"
                                 style="border:none;border-right:1px solid rgba(255,255,255,0.15);font-weight:600;letter-spacing:.5px;color:#FFFFFF;text-align:center;">
@@ -94,10 +94,10 @@
                                 <div class="mt-1" style="color:#6c7a89;" t-field="line.name"/>
                             </td>
                             <td class="py-3 text-center" style="color:#495057;border-right:1px solid #d7dee8;">
-                                <span t-field="line.product_uom_id" groups="uom.group_uom"/>
+                                <span t-field="line.product_qty"/>
                             </td>
                             <td class="py-3 text-center" style="color:#495057;border-right:1px solid #d7dee8;">
-                                <span t-field="line.product_qty"/>
+                                <span t-field="line.product_uom_id" groups="uom.group_uom"/>
                             </td>
                             <td class="py-3 ps-3" style="color:#495057;border-right:1px solid #d7dee8;"/>
                             <td class="py-3 pe-3" style="color:#495057;border-right:1px solid #d7dee8;"/>
