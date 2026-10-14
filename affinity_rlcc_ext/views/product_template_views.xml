@@ -9,6 +9,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='default_code']" position="after">
                     <field name="existing_code"/>
+                    <field name="old_existing_code"/>
+                    <field name="old_existing_name"/>
                 </xpath>
             </field>
         </record>
