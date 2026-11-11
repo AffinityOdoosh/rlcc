@@ -20,10 +20,13 @@
         'wizard/move_attendance_wizard_view.xml',
         'wizard/generate_missing_attendance.xml',
     ],
+    'external_dependencies': {
+        'python': ['pyzk'],
+    },
     'images':  ["static/description/image.png"],
     'price' : 160,
     'currency' :  'EUR',
     'installable': True,
     'auto_install': False,
-    'application':False,   
+    'application':False,
 }
